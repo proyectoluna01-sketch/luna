@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Iniciar sesión</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm">
+        <h1 class="text-2xl font-bold text-slate-800 mb-1 text-center">Panel Admin</h1>
+        <p class="text-sm text-slate-500 mb-6 text-center">Inicia sesión para continuar</p>
+
+        <form id="form-login" class="space-y-4">
+            <div>
+                <label class="text-sm font-semibold text-slate-600">Correo</label>
+                <input type="email" id="email" required class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800">
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-600">Contraseña</label>
+                <input type="password" id="password" required class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-800">
+            </div>
+            <p id="error-msg" class="text-sm text-red-600 hidden"></p>
+            <button type="submit" id="btn-login" class="w-full bg-slate-800 text-white font-semibold py-2.5 rounded-lg hover:bg-slate-700 transition">
+                Entrar
+            </button>
+        </form>
+    </div>
+
+    <script src="/admin/config.js"></script>
+    <script>
+        (async () => {
+            const sesion = await Sesion.verificar();
+            if (sesion) window.location.href = '/admin/panel.html';
+        })();
+
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.classList.add('hidden');
+            btn.disabled = true; btn.textContent = 'Entrando...';
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            const { data, error } = await sb.rpc('admin_login', { p_email: email, p_password: password });
+
+            if (error || !data?.success) {
+                errorMsg.textContent = data?.message || 'Error al iniciar sesión';
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false; btn.textContent = 'Entrar';
+                return;
+            }
+
+            Sesion.guardar(data.token);
+            window.location.href = '/admin/panel.html';
+        });
+    </script>
+</body>
+</html>
