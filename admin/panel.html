@@ -8,21 +8,21 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-[#FBEFF1] min-h-screen">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-56 bg-slate-900 text-slate-200 flex flex-col shrink-0">
-            <div class="p-5 border-b border-slate-800">
-                <p class="font-bold text-lg" id="sidebar-nombre-negocio">Panel Admin</p>
-                <p class="text-xs text-slate-400" id="sidebar-usuario"></p>
+        <aside class="w-56 bg-[#5C3A41] text-[#F3D9DE] flex flex-col shrink-0">
+            <div class="p-5 border-b border-[#734953]">
+                <p class="font-bold text-lg text-white" id="sidebar-nombre-negocio">Panel Admin</p>
+                <p class="text-xs text-[#D9AEB6]" id="sidebar-usuario"></p>
             </div>
             <nav class="flex-1 p-3 space-y-1">
-                <button data-tab="config" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 flex items-center gap-2"><i data-lucide="settings" class="h-4 w-4"></i> Mi Negocio</button>
-                <button data-tab="categorias" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 flex items-center gap-2"><i data-lucide="folder-tree" class="h-4 w-4"></i> Categorías</button>
-                <button data-tab="productos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 flex items-center gap-2"><i data-lucide="package" class="h-4 w-4"></i> Productos</button>
+                <button data-tab="config" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="settings" class="h-4 w-4"></i> Mi Negocio</button>
+                <button data-tab="categorias" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="folder-tree" class="h-4 w-4"></i> Categorías</button>
+                <button data-tab="productos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="package" class="h-4 w-4"></i> Productos</button>
             </nav>
-            <div class="p-3 border-t border-slate-800">
-                <button id="btn-logout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800 flex items-center gap-2 text-red-300"><i data-lucide="log-out" class="h-4 w-4"></i> Cerrar sesión</button>
+            <div class="p-3 border-t border-[#734953]">
+                <button id="btn-logout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2 text-[#F3B8C4]"><i data-lucide="log-out" class="h-4 w-4"></i> Cerrar sesión</button>
             </div>
         </aside>
 
@@ -31,42 +31,42 @@
 
             <!-- TAB: Configuracion del negocio -->
             <section id="tab-config" class="tab-content max-w-xl">
-                <h2 class="text-xl font-bold text-slate-800 mb-4">Mi Negocio</h2>
-                <div class="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+                <h2 class="text-xl font-bold text-[#7D4F58] mb-4">Mi Negocio</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-6 space-y-4">
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">Logo</label>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Logo</label>
                         <div class="flex items-center gap-4 mt-2">
-                            <img id="preview-logo" src="" class="h-16 w-16 rounded-lg object-cover border bg-slate-50 hidden">
+                            <img id="preview-logo" src="" class="h-16 w-16 rounded-lg object-cover border border-[#F1D9DE] bg-[#FDF6F7] hidden">
                             <input type="file" id="input-logo" accept="image/*" class="text-sm">
                         </div>
                     </div>
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">Nombre del negocio</label>
-                        <input type="text" id="cfg-nombre" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2">
+                        <label class="text-sm font-semibold text-[#9C6B76]">Nombre del negocio</label>
+                        <input type="text" id="cfg-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                     </div>
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">Color principal</label>
-                        <input type="color" id="cfg-color" class="mt-1 h-10 w-20 border border-slate-300 rounded-lg">
+                        <label class="text-sm font-semibold text-[#9C6B76]">Color principal</label>
+                        <input type="color" id="cfg-color" class="mt-1 h-10 w-20 border border-[#EAC7CE] rounded-lg">
                     </div>
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">Teléfono de contacto</label>
-                        <input type="text" id="cfg-telefono" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2">
+                        <label class="text-sm font-semibold text-[#9C6B76]">Teléfono de contacto</label>
+                        <input type="text" id="cfg-telefono" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                     </div>
                     <div>
-                        <label class="text-sm font-semibold text-slate-600">Dirección</label>
-                        <input type="text" id="cfg-direccion" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2">
+                        <label class="text-sm font-semibold text-[#9C6B76]">Dirección</label>
+                        <input type="text" id="cfg-direccion" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                     </div>
-                    <button id="btn-guardar-config" class="bg-slate-800 text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-slate-700">Guardar cambios</button>
+                    <button id="btn-guardar-config" class="bg-[#B76E79] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#a15c67]">Guardar cambios</button>
                     <p id="config-msg" class="text-sm hidden"></p>
                 </div>
             </section>
 
             <!-- TAB: Categorias -->
             <section id="tab-categorias" class="tab-content hidden max-w-2xl">
-                <h2 class="text-xl font-bold text-slate-800 mb-4">Categorías</h2>
-                <div class="bg-white rounded-xl shadow-sm border p-4 mb-4 flex gap-2">
-                    <input type="text" id="nueva-categoria" placeholder="Nombre de la categoría" class="flex-1 border border-slate-300 rounded-lg px-3 py-2">
-                    <button id="btn-crear-categoria" class="bg-slate-800 text-white font-semibold px-4 py-2 rounded-lg hover:bg-slate-700">Agregar</button>
+                <h2 class="text-xl font-bold text-[#7D4F58] mb-4">Categorías</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-4 mb-4 flex gap-2">
+                    <input type="text" id="nueva-categoria" placeholder="Nombre de la categoría" class="flex-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <button id="btn-crear-categoria" class="bg-[#B76E79] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#a15c67]">Agregar</button>
                 </div>
                 <div id="lista-categorias" class="space-y-2"></div>
             </section>
@@ -74,8 +74,8 @@
             <!-- TAB: Productos -->
             <section id="tab-productos" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-slate-800">Productos</h2>
-                    <button id="btn-nuevo-producto" class="bg-slate-800 text-white font-semibold px-4 py-2 rounded-lg hover:bg-slate-700 flex items-center gap-2">
+                    <h2 class="text-xl font-bold text-[#7D4F58]">Productos</h2>
+                    <button id="btn-nuevo-producto" class="bg-[#B76E79] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#a15c67] flex items-center gap-2">
                         <i data-lucide="plus" class="h-4 w-4"></i> Nuevo producto
                     </button>
                 </div>
@@ -87,33 +87,33 @@
 
     <!-- Modal producto -->
     <div id="modal-producto" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <h3 id="modal-producto-titulo" class="text-lg font-bold text-slate-800 mb-4">Nuevo producto</h3>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 border border-[#F1D9DE]">
+            <h3 id="modal-producto-titulo" class="text-lg font-bold text-[#7D4F58] mb-4">Nuevo producto</h3>
             <div class="space-y-3">
                 <input type="hidden" id="prod-id">
                 <div>
-                    <label class="text-sm font-semibold text-slate-600">Nombre</label>
-                    <input type="text" id="prod-nombre" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2">
+                    <label class="text-sm font-semibold text-[#9C6B76]">Nombre</label>
+                    <input type="text" id="prod-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                 </div>
                 <div>
-                    <label class="text-sm font-semibold text-slate-600">Categoría</label>
-                    <select id="prod-categoria" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2"></select>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Categoría</label>
+                    <select id="prod-categoria" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]"></select>
                 </div>
                 <div>
-                    <label class="text-sm font-semibold text-slate-600">Precio de venta</label>
-                    <input type="number" step="0.01" id="prod-precio" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2">
+                    <label class="text-sm font-semibold text-[#9C6B76]">Precio de venta</label>
+                    <input type="number" step="0.01" id="prod-precio" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                 </div>
                 <div>
-                    <label class="text-sm font-semibold text-slate-600">Foto principal</label>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Foto principal</label>
                     <div class="flex items-center gap-3 mt-1">
-                        <img id="prod-preview-imagen" src="" class="h-14 w-14 rounded-lg object-cover border bg-slate-50 hidden">
+                        <img id="prod-preview-imagen" src="" class="h-14 w-14 rounded-lg object-cover border border-[#F1D9DE] bg-[#FDF6F7] hidden">
                         <input type="file" id="prod-input-imagen" accept="image/*" class="text-sm">
                     </div>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
-                <button id="btn-cancelar-producto" class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50">Cancelar</button>
-                <button id="btn-guardar-producto" class="px-4 py-2 rounded-lg bg-slate-800 text-white font-semibold hover:bg-slate-700">Guardar</button>
+                <button id="btn-cancelar-producto" class="px-4 py-2 rounded-lg border border-[#EAC7CE] text-[#7D4F58] hover:bg-[#FDF6F7]">Cancelar</button>
+                <button id="btn-guardar-producto" class="px-4 py-2 rounded-lg bg-[#B76E79] text-white font-semibold hover:bg-[#a15c67]">Guardar</button>
             </div>
         </div>
     </div>

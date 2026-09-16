@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function cambiarTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.getElementById(`tab-${tab}`).classList.remove('hidden');
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('bg-slate-800', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('bg-[#734953]', b.dataset.tab === tab));
 }
 
 function mostrarMensaje(el, texto, tipo = 'success') {
