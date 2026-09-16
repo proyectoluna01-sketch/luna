@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
 <style>
     body { font-family: 'Inter', sans-serif; }
     .font-display { font-family: 'Cormorant Garamond', serif; }
@@ -81,11 +82,47 @@
                 <span>Total</span>
                 <span id="carrito-total">$0.00</span>
             </div>
+            <button id="btn-abrir-checkout-yappy" class="w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition flex items-center justify-center gap-2 mb-2">
+                <i data-lucide="credit-card" class="h-5 w-5"></i> Pagar con Yappy
+            </button>
             <button id="btn-checkout-whatsapp" class="w-full bg-[#25D366] text-white font-semibold py-3 rounded-full hover:bg-[#1ebc59] transition flex items-center justify-center gap-2">
                 <i data-lucide="message-circle" class="h-5 w-5"></i> Pedir por WhatsApp
             </button>
         </div>
     </aside>
+
+    <!-- Modal checkout Yappy -->
+    <div id="modal-checkout" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-display text-xl font-semibold text-[#7D4F58]">Pagar con Yappy</h3>
+                <button id="btn-cerrar-checkout" class="text-[#B8909A] hover:text-[#7D4F58]"><i data-lucide="x" class="h-5 w-5"></i></button>
+            </div>
+
+            <div id="checkout-form" class="space-y-3">
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Nombre completo</label>
+                    <input type="text" id="checkout-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Teléfono (tu cuenta Yappy)</label>
+                    <input type="tel" id="checkout-telefono" placeholder="Ej: 60001234" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Dirección de entrega (opcional)</label>
+                    <input type="text" id="checkout-direccion" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                </div>
+                <p id="checkout-error" class="text-sm text-red-600 hidden"></p>
+                <button id="btn-continuar-checkout" class="w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition mt-2">Continuar</button>
+            </div>
+
+            <div id="checkout-yappy-wrapper" class="hidden flex-col items-center gap-3">
+                <p class="text-sm text-[#9C6B76] text-center">Total a pagar: <span id="checkout-monto" class="font-semibold text-[#7D4F58]"></span></p>
+                <btn-yappy rounded="true" theme="light" id="btn-yappy-component" style="width: 100%;"></btn-yappy>
+                <p id="checkout-estado" class="text-sm text-center text-[#9C6B76]"></p>
+            </div>
+        </div>
+    </div>
 
     <script src="/admin/config.js"></script>
     <script src="/js/tienda.js"></script>

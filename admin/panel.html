@@ -20,6 +20,7 @@
                 <button data-tab="config" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="settings" class="h-4 w-4"></i> Mi Negocio</button>
                 <button data-tab="categorias" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="folder-tree" class="h-4 w-4"></i> Categorías</button>
                 <button data-tab="productos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="package" class="h-4 w-4"></i> Productos</button>
+                <button data-tab="pagos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="credit-card" class="h-4 w-4"></i> Pagos</button>
             </nav>
             <div class="p-3 border-t border-[#734953]">
                 <button id="btn-logout" class="w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2 text-[#F3B8C4]"><i data-lucide="log-out" class="h-4 w-4"></i> Cerrar sesión</button>
@@ -80,6 +81,20 @@
                     </button>
                 </div>
                 <div id="lista-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- TAB: Pagos -->
+            <section id="tab-pagos" class="tab-content hidden max-w-xl">
+                <h2 class="text-xl font-bold text-[#7D4F58] mb-4">Pagos</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-6 space-y-4">
+                    <div>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Yappy Merchant ID</label>
+                        <input type="text" id="pagos-yappy-merchant" placeholder="Lo encuentras en tu panel de comercio Yappy" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                        <p class="text-xs text-[#B8909A] mt-1">Necesario para que los clientes puedan pagar con Yappy en la tienda.</p>
+                    </div>
+                    <button id="btn-guardar-pagos" class="bg-[#B76E79] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#a15c67]">Guardar cambios</button>
+                    <p id="pagos-msg" class="text-sm hidden"></p>
+                </div>
             </section>
 
         </main>

@@ -205,4 +205,112 @@ function configurarEventos() {
     });
 
     document.getElementById('btn-checkout-whatsapp').addEventListener('click', enviarPedidoWhatsapp);
+
+    document.getElementById('btn-abrir-checkout-yappy').addEventListener('click', abrirModalCheckout);
+    document.getElementById('btn-cerrar-checkout').addEventListener('click', cerrarModalCheckout);
+    document.getElementById('btn-continuar-checkout').addEventListener('click', continuarCheckoutYappy);
+
+    configurarBotonYappy();
+}
+
+// ===================== CHECKOUT CON YAPPY =====================
+const EDGE_FUNCTION_YAPPY_URL = `${SUPABASE_URL}/functions/v1/yappy-push`;
+let yappyOrderIdActual = null;
+let yappyMontoActivo = 0;
+
+function abrirModalCheckout() {
+    if (carrito.length === 0) return;
+    document.getElementById('checkout-form').classList.remove('hidden');
+    document.getElementById('checkout-yappy-wrapper').classList.add('hidden');
+    document.getElementById('checkout-yappy-wrapper').classList.remove('flex');
+    document.getElementById('checkout-error').classList.add('hidden');
+    document.getElementById('modal-checkout').classList.remove('hidden');
+    document.getElementById('modal-checkout').classList.add('flex');
+}
+
+function cerrarModalCheckout() {
+    document.getElementById('modal-checkout').classList.add('hidden');
+    document.getElementById('modal-checkout').classList.remove('flex');
+}
+
+async function continuarCheckoutYappy() {
+    const nombre = document.getElementById('checkout-nombre').value.trim();
+    const telefono = document.getElementById('checkout-telefono').value.trim().replace(/\D/g, '');
+    const direccion = document.getElementById('checkout-direccion').value.trim();
+    const errorEl = document.getElementById('checkout-error');
+
+    if (!nombre || telefono.length < 8) {
+        errorEl.textContent = 'Escribe tu nombre y un teléfono válido.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    const total = carrito.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
+    const { data: orderId, error } = await sb.rpc('crear_pedido_pendiente_pago', {
+        p_carrito: carrito,
+        p_nombre: nombre,
+        p_telefono: telefono,
+        p_direccion: direccion || null,
+        p_tipo_entrega: direccion ? 'Delivery' : 'Tienda',
+        p_monto: total
+    });
+
+    if (error || !orderId) {
+        errorEl.textContent = 'No se pudo iniciar el pago. Intenta de nuevo.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    yappyOrderIdActual = orderId;
+    yappyMontoActivo = total;
+
+    document.getElementById('checkout-form').classList.add('hidden');
+    document.getElementById('checkout-monto').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('checkout-yappy-wrapper').classList.remove('hidden');
+    document.getElementById('checkout-yappy-wrapper').classList.add('flex');
+}
+
+function configurarBotonYappy() {
+    const btnYappy = document.getElementById('btn-yappy-component');
+    if (!btnYappy) return;
+
+    btnYappy.addEventListener('eventClick', async () => {
+        const telefono = document.getElementById('checkout-telefono').value.trim().replace(/\D/g, '');
+        const estadoEl = document.getElementById('checkout-estado');
+        try {
+            btnYappy.setAttribute('isButtonLoading', 'true');
+            const resp = await fetch(EDGE_FUNCTION_YAPPY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    monto: yappyMontoActivo,
+                    telefono,
+                    domain: window.location.origin,
+                    order_id: yappyOrderIdActual
+                })
+            });
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+            btnYappy.eventPayment({ transactionId: data.transactionId, documentName: data.documentName, token: data.token });
+        } catch (err) {
+            btnYappy.setAttribute('isButtonLoading', 'false');
+            estadoEl.textContent = 'Error: ' + err.message;
+            estadoEl.className = 'text-sm text-center text-red-600';
+        }
+    });
+
+    btnYappy.addEventListener('eventSuccess', () => {
+        btnYappy.setAttribute('isButtonLoading', 'false');
+        document.getElementById('checkout-estado').textContent = '¡Pago confirmado! Gracias por tu compra.';
+        document.getElementById('checkout-estado').className = 'text-sm text-center text-emerald-600 font-semibold';
+        carrito = [];
+        guardarCarrito();
+        setTimeout(() => { cerrarModalCheckout(); cerrarCarrito(); }, 2500);
+    });
+
+    btnYappy.addEventListener('eventError', () => {
+        btnYappy.setAttribute('isButtonLoading', 'false');
+        document.getElementById('checkout-estado').textContent = 'Pago cancelado o falló la conexión.';
+        document.getElementById('checkout-estado').className = 'text-sm text-center text-red-600';
+    });
 }

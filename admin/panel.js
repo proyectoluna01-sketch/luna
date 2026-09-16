@@ -20,10 +20,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarConfigNegocio();
     await cargarCategorias();
     await cargarProductos();
+    await cargarConfigPagos();
 
     configurarEventosConfig();
     configurarEventosCategorias();
     configurarEventosProductos();
+    configurarEventosPagos();
 
     cambiarTab('config');
 });
@@ -191,6 +193,25 @@ function abrirModalProducto(producto = null) {
 function cerrarModalProducto() {
     document.getElementById('modal-producto').classList.add('hidden');
     document.getElementById('modal-producto').classList.remove('flex');
+}
+
+// ===================== PAGOS =====================
+async function cargarConfigPagos() {
+    const { data } = await sb.rpc('admin_obtener_config_pagos', { p_token: sesionActual.token });
+    if (data?.success) document.getElementById('pagos-yappy-merchant').value = data.yappy_merchant_id || '';
+}
+
+function configurarEventosPagos() {
+    document.getElementById('btn-guardar-pagos').addEventListener('click', async () => {
+        const msg = document.getElementById('pagos-msg');
+        const { data, error } = await sb.rpc('admin_guardar_config_pagos', {
+            p_token: sesionActual.token,
+            p_yappy_merchant_id: document.getElementById('pagos-yappy-merchant').value.trim() || null
+        });
+        msg.classList.remove('hidden');
+        if (error || !data?.success) mostrarMensaje(msg, 'Error al guardar', 'error');
+        else mostrarMensaje(msg, 'Guardado correctamente');
+    });
 }
 
 function configurarEventosProductos() {
