@@ -1,6 +1,7 @@
 let productosCache = [];
 let categoriasCache = [];
 let categoriaActiva = null;
+let ordenActual = 'recientes';
 let carrito = JSON.parse(localStorage.getItem('carrito_tienda') || '[]');
 let telefonoNegocio = null;
 
@@ -25,6 +26,20 @@ async function cargarConfigNegocio() {
     document.getElementById('footer-direccion').textContent = data.direccion || '';
     document.getElementById('footer-telefono').textContent = data.telefono_contacto || '';
     telefonoNegocio = data.telefono_contacto;
+
+    if (data.mensaje_promocional) {
+        const track = document.getElementById('marquee-track');
+        const item = `<span class="mx-6">${data.mensaje_promocional}</span>`;
+        track.innerHTML = item.repeat(8);
+        document.getElementById('barra-promo').classList.remove('hidden');
+    }
+
+    if (data.hero_titulo || data.hero_imagen_url) {
+        document.getElementById('hero-titulo').textContent = data.hero_titulo || '';
+        document.getElementById('hero-descripcion').textContent = data.hero_descripcion || '';
+        if (data.hero_imagen_url) document.getElementById('hero-imagen').src = data.hero_imagen_url;
+        document.getElementById('seccion-hero').classList.remove('hidden');
+    }
 }
 
 async function cargarCategorias() {
@@ -34,13 +49,23 @@ async function cargarCategorias() {
 }
 
 function renderCategoriasNav() {
-    const cont = document.getElementById('lista-categorias-nav');
-    const chip = (id, nombre) => `
-        <button data-cat="${id ?? ''}" class="chip-categoria px-4 py-1.5 rounded-full text-sm font-medium border transition
-            ${categoriaActiva === id ? 'bg-[#B76E79] text-white border-[#B76E79]' : 'bg-white text-[#7D4F58] border-[#F1D9DE] hover:border-[#B76E79]'}">
+    const navTexto = document.getElementById('nav-categorias-texto');
+    const linkTexto = (id, nombre) => `
+        <button data-cat="${id ?? ''}" class="chip-categoria transition ${categoriaActiva === id ? 'text-[#B76E79] underline underline-offset-4' : 'text-[#7D4F58] hover:text-[#B76E79]'}">
             ${nombre}
         </button>`;
-    cont.innerHTML = chip(null, 'Todos') + categoriasCache.map(c => chip(c.id, c.nombre)).join('');
+    navTexto.innerHTML = linkTexto(null, 'Inicio') + categoriasCache.map(c => linkTexto(c.id, c.nombre)).join('');
+
+    const iconos = document.getElementById('lista-categorias-iconos');
+    const iconoCat = (id, nombre, imagen) => `
+        <button data-cat="${id ?? ''}" class="chip-categoria flex flex-col items-center gap-1.5 shrink-0">
+            <span class="h-16 w-16 rounded-full border-2 ${categoriaActiva === id ? 'border-[#B76E79]' : 'border-[#F1D9DE]'} overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
+                ${imagen ? `<img src="${imagen}" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="h-6 w-6 text-[#E3BFC6]"></i>'}
+            </span>
+            <span class="text-[10px] font-semibold uppercase tracking-wide text-[#7D4F58]">${nombre}</span>
+        </button>`;
+    iconos.innerHTML = iconoCat(null, 'Todo', null) + categoriasCache.map(c => iconoCat(c.id, c.nombre, c.imagen_url)).join('');
+    lucide.createIcons();
 }
 
 async function cargarProductos() {
@@ -52,7 +77,12 @@ async function cargarProductos() {
 function renderProductos() {
     const grid = document.getElementById('grid-productos');
     const sinProductos = document.getElementById('sin-productos');
-    const filtrados = categoriaActiva ? productosCache.filter(p => p.categoria_id === categoriaActiva) : productosCache;
+    let filtrados = categoriaActiva ? productosCache.filter(p => p.categoria_id === categoriaActiva) : productosCache;
+
+    if (ordenActual === 'precio_asc') filtrados = [...filtrados].sort((a, b) => a.precio_venta - b.precio_venta);
+    else if (ordenActual === 'precio_desc') filtrados = [...filtrados].sort((a, b) => b.precio_venta - a.precio_venta);
+
+    document.getElementById('contador-productos').textContent = `${filtrados.length} producto${filtrados.length === 1 ? '' : 's'}`;
 
     if (filtrados.length === 0) {
         grid.innerHTML = '';
@@ -170,11 +200,19 @@ function enviarPedidoWhatsapp() {
 }
 
 function configurarEventos() {
-    document.getElementById('lista-categorias-nav').addEventListener('click', (e) => {
+    const manejarClickCategoria = (e) => {
         const btn = e.target.closest('.chip-categoria');
         if (!btn) return;
         categoriaActiva = btn.dataset.cat || null;
         renderCategoriasNav();
+        renderProductos();
+        window.scrollTo({ top: document.getElementById('seccion-hero').offsetTop, behavior: 'smooth' });
+    };
+    document.getElementById('nav-categorias-texto').addEventListener('click', manejarClickCategoria);
+    document.getElementById('lista-categorias-iconos').addEventListener('click', manejarClickCategoria);
+
+    document.getElementById('select-orden').addEventListener('change', (e) => {
+        ordenActual = e.target.value;
         renderProductos();
     });
 

@@ -57,17 +57,45 @@
                         <label class="text-sm font-semibold text-[#9C6B76]">Dirección</label>
                         <input type="text" id="cfg-direccion" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                     </div>
+                    <div>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Mensaje de la barra promocional</label>
+                        <input type="text" id="cfg-promo" placeholder="Ej: Envío gratis con compras de $50+" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    </div>
                     <button id="btn-guardar-config" class="bg-[#B76E79] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#a15c67]">Guardar cambios</button>
                     <p id="config-msg" class="text-sm hidden"></p>
+                </div>
+
+                <h2 class="text-xl font-bold text-[#7D4F58] mb-4 mt-8">Sección Destacada</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-6 space-y-4">
+                    <div>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Imagen</label>
+                        <div class="flex items-center gap-4 mt-2">
+                            <img id="preview-hero" src="" class="h-16 w-24 rounded-lg object-cover border border-[#F1D9DE] bg-[#FDF6F7] hidden">
+                            <input type="file" id="input-hero" accept="image/*" class="text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Título</label>
+                        <input type="text" id="cfg-hero-titulo" placeholder="Ej: Sugar Rush" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-[#9C6B76]">Descripción</label>
+                        <textarea id="cfg-hero-descripcion" rows="3" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]"></textarea>
+                    </div>
+                    <button id="btn-guardar-hero" class="bg-[#B76E79] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#a15c67]">Guardar cambios</button>
+                    <p id="hero-msg" class="text-sm hidden"></p>
                 </div>
             </section>
 
             <!-- TAB: Categorias -->
             <section id="tab-categorias" class="tab-content hidden max-w-2xl">
                 <h2 class="text-xl font-bold text-[#7D4F58] mb-4">Categorías</h2>
-                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-4 mb-4 flex gap-2">
-                    <input type="text" id="nueva-categoria" placeholder="Nombre de la categoría" class="flex-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
-                    <button id="btn-crear-categoria" class="bg-[#B76E79] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#a15c67]">Agregar</button>
+                <div class="bg-white rounded-xl shadow-sm border border-[#F1D9DE] p-4 mb-4 space-y-2">
+                    <input type="text" id="nueva-categoria" placeholder="Nombre de la categoría" class="w-full border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="nueva-categoria-imagen" accept="image/*" class="text-sm flex-1">
+                        <button id="btn-crear-categoria" class="bg-[#B76E79] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#a15c67] whitespace-nowrap">Agregar</button>
+                    </div>
                 </div>
                 <div id="lista-categorias" class="space-y-2"></div>
             </section>

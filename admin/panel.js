@@ -3,6 +3,8 @@ let categoriasCache = [];
 let productosCache = [];
 let logoNuevoUrl = null;
 let productoImagenNuevaUrl = null;
+let heroImagenNuevaUrl = null;
+let nuevaCategoriaImagenUrl = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     sesionActual = await Sesion.requerir();
@@ -50,10 +52,17 @@ async function cargarConfigNegocio() {
     document.getElementById('cfg-color').value = data.color_primario || '#000000';
     document.getElementById('cfg-telefono').value = data.telefono_contacto || '';
     document.getElementById('cfg-direccion').value = data.direccion || '';
+    document.getElementById('cfg-promo').value = data.mensaje_promocional || '';
+    document.getElementById('cfg-hero-titulo').value = data.hero_titulo || '';
+    document.getElementById('cfg-hero-descripcion').value = data.hero_descripcion || '';
     document.getElementById('sidebar-nombre-negocio').textContent = data.nombre_negocio || 'Panel Admin';
     if (data.logo_url) {
         document.getElementById('preview-logo').src = data.logo_url;
         document.getElementById('preview-logo').classList.remove('hidden');
+    }
+    if (data.hero_imagen_url) {
+        document.getElementById('preview-hero').src = data.hero_imagen_url;
+        document.getElementById('preview-hero').classList.remove('hidden');
     }
 }
 
@@ -79,7 +88,11 @@ function configurarEventosConfig() {
             p_logo_url: logoNuevoUrl,
             p_color_primario: document.getElementById('cfg-color').value,
             p_telefono_contacto: document.getElementById('cfg-telefono').value.trim() || null,
-            p_direccion: document.getElementById('cfg-direccion').value.trim() || null
+            p_direccion: document.getElementById('cfg-direccion').value.trim() || null,
+            p_mensaje_promocional: document.getElementById('cfg-promo').value.trim() || null,
+            p_hero_titulo: document.getElementById('cfg-hero-titulo').value.trim() || null,
+            p_hero_descripcion: document.getElementById('cfg-hero-descripcion').value.trim() || null,
+            p_hero_imagen_url: heroImagenNuevaUrl
         });
         msg.classList.remove('hidden');
         if (error || !data?.success) {
@@ -88,6 +101,25 @@ function configurarEventosConfig() {
             mostrarMensaje(msg, 'Guardado correctamente');
             document.getElementById('sidebar-nombre-negocio').textContent = document.getElementById('cfg-nombre').value.trim();
         }
+    });
+
+    document.getElementById('input-hero').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const preview = document.getElementById('preview-hero');
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('hidden');
+        try {
+            heroImagenNuevaUrl = await subirImagen(file, 'productos');
+        } catch (err) {
+            alert('Error al subir la imagen: ' + err.message);
+        }
+    });
+
+    document.getElementById('btn-guardar-hero').addEventListener('click', () => {
+        document.getElementById('btn-guardar-config').click();
+        document.getElementById('hero-msg').classList.remove('hidden');
+        mostrarMensaje(document.getElementById('hero-msg'), 'Guardado correctamente');
     });
 }
 
@@ -107,7 +139,12 @@ function renderCategorias() {
     }
     cont.innerHTML = categoriasCache.map(c => `
         <div class="bg-white rounded-lg border p-3 flex justify-between items-center">
-            <span class="font-medium text-slate-700">${c.nombre}</span>
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full overflow-hidden bg-[#FDF6F7] border border-[#F1D9DE] shrink-0">
+                    ${c.imagen_url ? `<img src="${c.imagen_url}" class="h-full w-full object-cover">` : ''}
+                </div>
+                <span class="font-medium text-slate-700">${c.nombre}</span>
+            </div>
             <button class="btn-borrar-categoria text-red-400 hover:text-red-600 p-1" data-id="${c.id}"><i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i></button>
         </div>
     `).join('');
@@ -115,13 +152,25 @@ function renderCategorias() {
 }
 
 function configurarEventosCategorias() {
+    document.getElementById('nueva-categoria-imagen').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            nuevaCategoriaImagenUrl = await subirImagen(file, 'productos');
+        } catch (err) {
+            alert('Error al subir la imagen: ' + err.message);
+        }
+    });
+
     document.getElementById('btn-crear-categoria').addEventListener('click', async () => {
         const input = document.getElementById('nueva-categoria');
         const nombre = input.value.trim();
         if (!nombre) return;
-        const { data, error } = await sb.rpc('admin_guardar_categoria', { p_token: sesionActual.token, p_id: null, p_nombre: nombre });
+        const { data, error } = await sb.rpc('admin_guardar_categoria', { p_token: sesionActual.token, p_id: null, p_nombre: nombre, p_imagen_url: nuevaCategoriaImagenUrl });
         if (error || !data?.success) { alert('Error al crear la categoria'); return; }
         input.value = '';
+        nuevaCategoriaImagenUrl = null;
+        document.getElementById('nueva-categoria-imagen').value = '';
         await cargarCategorias();
     });
 
