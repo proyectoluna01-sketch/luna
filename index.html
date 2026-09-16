@@ -2,12 +2,92 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=/admin/index.html">
-<title>Redirigiendo...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-display { font-family: 'Cormorant Garamond', serif; }
+</style>
 </head>
-<body>
-    <p>Redirigiendo al panel admin...</p>
-    <script>window.location.href = '/admin/index.html';</script>
+<body class="bg-[#FFFBF9] text-[#3E2C30]">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-[#FFFBF9]/90 backdrop-blur border-b border-[#F1D9DE]">
+        <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img id="header-logo" src="" class="h-10 w-10 rounded-full object-cover hidden">
+                <h1 id="header-nombre" class="font-display text-2xl font-semibold tracking-wide text-[#7D4F58]">Tienda</h1>
+            </div>
+            <button id="btn-abrir-carrito" class="relative p-2 rounded-full hover:bg-[#F8E4E8] transition">
+                <i data-lucide="shopping-bag" class="h-6 w-6 text-[#7D4F58]"></i>
+                <span id="carrito-contador" class="absolute -top-1 -right-1 bg-[#B76E79] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="max-w-6xl mx-auto px-5 pt-16 pb-10 text-center">
+        <h2 class="font-display text-4xl sm:text-5xl font-semibold text-[#7D4F58] mb-3">Piezas para tu historia</h2>
+        <p class="text-[#9C6B76] max-w-md mx-auto">Descubre la colección y encuentra la pieza perfecta para cada momento.</p>
+    </section>
+
+    <!-- Categorias -->
+    <nav class="max-w-6xl mx-auto px-5 mb-10 overflow-x-auto">
+        <div id="lista-categorias-nav" class="flex gap-2 justify-center flex-wrap"></div>
+    </nav>
+
+    <!-- Grid de productos -->
+    <main class="max-w-6xl mx-auto px-5 pb-24">
+        <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10"></div>
+        <p id="sin-productos" class="text-center text-[#B8909A] py-20 hidden">Aún no hay productos disponibles.</p>
+    </main>
+
+    <footer class="border-t border-[#F1D9DE] py-8 text-center text-sm text-[#B8909A]">
+        <p id="footer-direccion"></p>
+        <p id="footer-telefono"></p>
+    </footer>
+
+    <!-- Modal producto -->
+    <div id="modal-producto" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden grid sm:grid-cols-2">
+            <div class="bg-[#FDF6F7] aspect-square flex items-center justify-center">
+                <img id="modal-producto-imagen" src="" class="w-full h-full object-cover">
+            </div>
+            <div class="p-6 sm:p-8 flex flex-col">
+                <button id="btn-cerrar-modal-producto" class="self-end text-[#B8909A] hover:text-[#7D4F58]"><i data-lucide="x" class="h-5 w-5"></i></button>
+                <p id="modal-producto-categoria" class="text-xs uppercase tracking-widest text-[#B8909A] mb-1"></p>
+                <h3 id="modal-producto-nombre" class="font-display text-2xl font-semibold text-[#7D4F58] mb-3"></h3>
+                <p id="modal-producto-precio" class="text-xl font-semibold text-[#B76E79] mb-6"></p>
+                <button id="btn-agregar-carrito" class="mt-auto w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition">Agregar al carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrito lateral -->
+    <div id="overlay-carrito" class="fixed inset-0 bg-black/40 hidden z-40"></div>
+    <aside id="panel-carrito" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white z-50 translate-x-full transition-transform duration-300 flex flex-col shadow-xl">
+        <div class="p-5 border-b border-[#F1D9DE] flex justify-between items-center">
+            <h3 class="font-display text-xl font-semibold text-[#7D4F58]">Tu carrito</h3>
+            <button id="btn-cerrar-carrito" class="text-[#B8909A] hover:text-[#7D4F58]"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div id="items-carrito" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+        <div class="p-5 border-t border-[#F1D9DE]">
+            <div class="flex justify-between mb-4 font-semibold text-[#7D4F58]">
+                <span>Total</span>
+                <span id="carrito-total">$0.00</span>
+            </div>
+            <button id="btn-checkout-whatsapp" class="w-full bg-[#25D366] text-white font-semibold py-3 rounded-full hover:bg-[#1ebc59] transition flex items-center justify-center gap-2">
+                <i data-lucide="message-circle" class="h-5 w-5"></i> Pedir por WhatsApp
+            </button>
+        </div>
+    </aside>
+
+    <script src="/admin/config.js"></script>
+    <script src="/js/tienda.js"></script>
 </body>
 </html>
-<!-- deploy test -->
