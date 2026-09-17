@@ -1,3 +1,14 @@
+// Oscurece un color hex un porcentaje dado -- se usa para el estado :hover
+// de los botones sin tener que guardar dos colores por separado en el admin.
+function oscurecerColor(hex, porcentaje) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * porcentaje);
+    const r = Math.max(0, (num >> 16) - amt);
+    const g = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+    const b = Math.max(0, (num & 0x0000FF) - amt);
+    return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
+}
+
 let productosCache = [];
 let categoriasCache = [];
 let categoriaActiva = null;
@@ -27,6 +38,11 @@ async function cargarConfigNegocio() {
     document.getElementById('footer-telefono').textContent = data.telefono_contacto || '';
     telefonoNegocio = data.telefono_contacto;
 
+    if (data.color_primario) {
+        document.documentElement.style.setProperty('--color-primario', data.color_primario);
+        document.documentElement.style.setProperty('--color-primario-hover', oscurecerColor(data.color_primario, 15));
+    }
+
     if (data.mensaje_promocional) {
         const track = document.getElementById('marquee-track');
         const item = `<span class="mx-6">${data.mensaje_promocional}</span>`;
@@ -51,7 +67,7 @@ async function cargarCategorias() {
 function renderCategoriasNav() {
     const navTexto = document.getElementById('nav-categorias-texto');
     const linkTexto = (id, nombre) => `
-        <button data-cat="${id ?? ''}" class="chip-categoria transition ${categoriaActiva === id ? 'text-[#B76E79] underline underline-offset-4' : 'text-[#7D4F58] hover:text-[#B76E79]'}">
+        <button data-cat="${id ?? ''}" class="chip-categoria transition ${categoriaActiva === id ? 'text-[var(--color-primario)] underline underline-offset-4' : 'text-[#7D4F58] hover:text-[var(--color-primario)]'}">
             ${nombre}
         </button>`;
     navTexto.innerHTML = linkTexto(null, 'Inicio') + categoriasCache.map(c => linkTexto(c.id, c.nombre)).join('');
@@ -59,7 +75,7 @@ function renderCategoriasNav() {
     const iconos = document.getElementById('lista-categorias-iconos');
     const iconoCat = (id, nombre, imagen) => `
         <button data-cat="${id ?? ''}" class="chip-categoria flex flex-col items-center gap-1.5 shrink-0">
-            <span class="h-16 w-16 rounded-full border-2 ${categoriaActiva === id ? 'border-[#B76E79]' : 'border-[#F1D9DE]'} overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
+            <span class="h-16 w-16 rounded-full border-2 ${categoriaActiva === id ? 'border-[var(--color-primario)]' : 'border-[#F1D9DE]'} overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
                 ${imagen ? `<img src="${imagen}" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="h-6 w-6 text-[#E3BFC6]"></i>'}
             </span>
             <span class="text-[10px] font-semibold uppercase tracking-wide text-[#7D4F58]">${nombre}</span>
@@ -92,14 +108,19 @@ function renderProductos() {
     sinProductos.classList.add('hidden');
 
     grid.innerHTML = filtrados.map(p => `
-        <div class="tarjeta-producto cursor-pointer group" data-id="${p.id}">
-            <div class="aspect-square bg-[#FDF6F7] rounded-xl overflow-hidden mb-3">
+        <div class="tarjeta-producto group" data-id="${p.id}">
+            <div class="relative aspect-square bg-[#FDF6F7] rounded-xl overflow-hidden mb-3 cursor-pointer">
                 ${p.imagen_url
                     ? `<img src="${p.imagen_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`
                     : `<div class="w-full h-full flex items-center justify-center"><i data-lucide="image" class="h-8 w-8 text-[#E3BFC6]"></i></div>`}
+                <button class="btn-agregar-rapido absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[var(--color-primario)] hover:bg-[var(--color-primario)] hover:text-white transition sm:opacity-0 sm:group-hover:opacity-100" data-id="${p.id}" title="Agregar al carrito">
+                    <i data-lucide="shopping-bag" class="h-4 w-4 pointer-events-none"></i>
+                </button>
             </div>
-            <p class="text-sm text-[#7D4F58] font-medium truncate">${p.nombre}</p>
-            <p class="text-[#B76E79] font-semibold">$${parseFloat(p.precio_venta).toFixed(2)}</p>
+            <div class="cursor-pointer">
+                <p class="text-sm text-[#7D4F58] font-medium truncate">${p.nombre}</p>
+                <p class="text-[var(--color-primario)] font-semibold">$${parseFloat(p.precio_venta).toFixed(2)}</p>
+            </div>
         </div>
     `).join('');
     lucide.createIcons();
@@ -217,6 +238,12 @@ function configurarEventos() {
     });
 
     document.getElementById('grid-productos').addEventListener('click', (e) => {
+        const btnRapido = e.target.closest('.btn-agregar-rapido');
+        if (btnRapido) {
+            const producto = productosCache.find(p => p.id === btnRapido.dataset.id);
+            if (producto) agregarAlCarrito(producto);
+            return;
+        }
         const card = e.target.closest('.tarjeta-producto');
         if (card) abrirModalProducto(card.dataset.id);
     });

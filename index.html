@@ -11,6 +11,11 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
 <style>
+    /* Plantilla reutilizable: estos dos valores son lo unico que cambia por
+       negocio, y se sobreescriben en runtime (tienda.js) leyendo
+       configuracion_negocio.color_primario -- asi el mismo codigo sirve
+       para cualquier cliente sin tocar nada aqui. */
+    :root { --color-primario: var(--color-primario); --color-primario-hover: var(--color-primario-hover); }
     body { font-family: 'Inter', sans-serif; }
     .font-display { font-family: 'Cormorant Garamond', serif; }
     @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -22,7 +27,7 @@
 <body class="bg-[#FFFBF9] text-[#3E2C30]">
 
     <!-- Barra de anuncios -->
-    <div id="barra-promo" class="bg-[#B76E79] text-white text-xs font-medium py-2 overflow-hidden whitespace-nowrap hidden">
+    <div id="barra-promo" class="bg-[var(--color-primario)] text-white text-xs font-medium py-2 overflow-hidden whitespace-nowrap hidden">
         <div id="marquee-track" class="marquee-track inline-block"></div>
     </div>
 
@@ -40,7 +45,7 @@
                 <button class="p-2 rounded-full hover:bg-[#F8E4E8] transition"><i data-lucide="user" class="h-5 w-5 text-[#7D4F58]"></i></button>
                 <button id="btn-abrir-carrito" class="relative p-2 rounded-full hover:bg-[#F8E4E8] transition">
                     <i data-lucide="shopping-bag" class="h-5 w-5 text-[#7D4F58]"></i>
-                    <span id="carrito-contador" class="absolute -top-1 -right-1 bg-[#B76E79] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    <span id="carrito-contador" class="absolute -top-1 -right-1 bg-[var(--color-primario)] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
                 </button>
             </div>
         </div>
@@ -103,8 +108,8 @@
                 <button id="btn-cerrar-modal-producto" class="self-end text-[#B8909A] hover:text-[#7D4F58]"><i data-lucide="x" class="h-5 w-5"></i></button>
                 <p id="modal-producto-categoria" class="text-xs uppercase tracking-widest text-[#B8909A] mb-1"></p>
                 <h3 id="modal-producto-nombre" class="font-display text-2xl font-semibold text-[#7D4F58] mb-3"></h3>
-                <p id="modal-producto-precio" class="text-xl font-semibold text-[#B76E79] mb-6"></p>
-                <button id="btn-agregar-carrito" class="mt-auto w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition">Agregar al carrito</button>
+                <p id="modal-producto-precio" class="text-xl font-semibold text-[var(--color-primario)] mb-6"></p>
+                <button id="btn-agregar-carrito" class="mt-auto w-full bg-[var(--color-primario)] text-white font-semibold py-3 rounded-full hover:bg-[var(--color-primario-hover)] transition">Agregar al carrito</button>
             </div>
         </div>
     </div>
@@ -122,7 +127,7 @@
                 <span>Total</span>
                 <span id="carrito-total">$0.00</span>
             </div>
-            <button id="btn-abrir-checkout-yappy" class="w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition flex items-center justify-center gap-2 mb-2">
+            <button id="btn-abrir-checkout-yappy" class="w-full bg-[var(--color-primario)] text-white font-semibold py-3 rounded-full hover:bg-[var(--color-primario-hover)] transition flex items-center justify-center gap-2 mb-2">
                 <i data-lucide="credit-card" class="h-5 w-5"></i> Pagar con Yappy
             </button>
             <button id="btn-checkout-whatsapp" class="w-full bg-[#25D366] text-white font-semibold py-3 rounded-full hover:bg-[#1ebc59] transition flex items-center justify-center gap-2">
@@ -142,18 +147,18 @@
             <div id="checkout-form" class="space-y-3">
                 <div>
                     <label class="text-sm font-semibold text-[#9C6B76]">Nombre completo</label>
-                    <input type="text" id="checkout-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <input type="text" id="checkout-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primario)]">
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-[#9C6B76]">Teléfono (tu cuenta Yappy)</label>
-                    <input type="tel" id="checkout-telefono" placeholder="Ej: 60001234" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <input type="tel" id="checkout-telefono" placeholder="Ej: 60001234" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primario)]">
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-[#9C6B76]">Dirección de entrega (opcional)</label>
-                    <input type="text" id="checkout-direccion" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <input type="text" id="checkout-direccion" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primario)]">
                 </div>
                 <p id="checkout-error" class="text-sm text-red-600 hidden"></p>
-                <button id="btn-continuar-checkout" class="w-full bg-[#B76E79] text-white font-semibold py-3 rounded-full hover:bg-[#a15c67] transition mt-2">Continuar</button>
+                <button id="btn-continuar-checkout" class="w-full bg-[var(--color-primario)] text-white font-semibold py-3 rounded-full hover:bg-[var(--color-primario-hover)] transition mt-2">Continuar</button>
             </div>
 
             <div id="checkout-yappy-wrapper" class="hidden flex-col items-center gap-3">
