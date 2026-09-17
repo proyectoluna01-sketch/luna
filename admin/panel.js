@@ -53,6 +53,7 @@ async function cargarConfigNegocio() {
     document.getElementById('cfg-telefono').value = data.telefono_contacto || '';
     document.getElementById('cfg-direccion').value = data.direccion || '';
     document.getElementById('cfg-promo').value = data.mensaje_promocional || '';
+    document.getElementById('cfg-instagram').value = data.instagram_url || '';
     document.getElementById('cfg-hero-titulo').value = data.hero_titulo || '';
     document.getElementById('cfg-hero-descripcion').value = data.hero_descripcion || '';
     document.getElementById('sidebar-nombre-negocio').textContent = data.nombre_negocio || 'Panel Admin';
@@ -92,7 +93,8 @@ function configurarEventosConfig() {
             p_mensaje_promocional: document.getElementById('cfg-promo').value.trim() || null,
             p_hero_titulo: document.getElementById('cfg-hero-titulo').value.trim() || null,
             p_hero_descripcion: document.getElementById('cfg-hero-descripcion').value.trim() || null,
-            p_hero_imagen_url: heroImagenNuevaUrl
+            p_hero_imagen_url: heroImagenNuevaUrl,
+            p_instagram_url: document.getElementById('cfg-instagram').value.trim() || null
         });
         msg.classList.remove('hidden');
         if (error || !data?.success) {

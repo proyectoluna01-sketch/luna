@@ -86,28 +86,39 @@
         <p id="sin-productos" class="text-center text-[#B8909A] py-20 hidden">No se encontró ningún producto.</p>
     </main>
 
-    <footer class="border-t border-[#F1D9DE] bg-[#FDF6F7] pt-10 pb-6">
-        <div class="max-w-6xl mx-auto px-5 grid sm:grid-cols-3 gap-8 text-sm">
-            <div class="flex items-start gap-3">
-                <img id="footer-logo" src="" class="h-10 w-10 rounded-full object-cover hidden">
-                <div>
-                    <p id="footer-nombre" class="font-display text-lg font-semibold text-[#7D4F58] mb-1"></p>
-                    <p id="footer-direccion" class="text-[#9C6B76]"></p>
+    <footer class="bg-[#3E2C30] text-[#EAD9DC]">
+        <!-- Franja de confianza -->
+        <div class="border-b border-white/10">
+            <div class="max-w-6xl mx-auto px-5 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
+                <div class="flex items-center gap-2"><i data-lucide="credit-card" class="h-4 w-4 shrink-0 text-[var(--color-primario)]"></i> Pago seguro con Yappy</div>
+                <div class="flex items-center gap-2"><i data-lucide="message-circle" class="h-4 w-4 shrink-0 text-[var(--color-primario)]"></i> Atención por WhatsApp</div>
+                <div class="flex items-center gap-2"><i data-lucide="truck" class="h-4 w-4 shrink-0 text-[var(--color-primario)]"></i> Coordinamos tu entrega</div>
+                <div class="flex items-center gap-2"><i data-lucide="badge-check" class="h-4 w-4 shrink-0 text-[var(--color-primario)]"></i> Piezas seleccionadas</div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <img id="footer-logo" src="" class="h-10 w-10 rounded-full object-cover hidden">
+                    <p id="footer-nombre" class="font-display text-lg font-semibold text-white"></p>
                 </div>
+                <p id="footer-direccion" class="text-[#C9AEB3]"></p>
+                <div id="footer-redes" class="flex items-center gap-3 mt-4"></div>
             </div>
             <div>
-                <p class="font-semibold text-[#7D4F58] mb-2">Contacto</p>
-                <p id="footer-telefono" class="text-[#9C6B76]"></p>
-                <a id="footer-whatsapp-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-[#25D366] font-medium mt-1 hover:underline">
+                <p class="font-semibold text-white mb-2">Contacto</p>
+                <p id="footer-telefono" class="text-[#C9AEB3]"></p>
+                <a id="footer-whatsapp-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-[#3DDC7A] font-medium mt-1 hover:underline">
                     <i data-lucide="message-circle" class="h-4 w-4"></i> Escríbenos por WhatsApp
                 </a>
             </div>
             <div>
-                <p class="font-semibold text-[#7D4F58] mb-2">Formas de pago</p>
-                <p class="text-[#9C6B76]">Yappy</p>
+                <p class="font-semibold text-white mb-2">Formas de pago</p>
+                <p class="text-[#C9AEB3]">Yappy</p>
             </div>
         </div>
-        <p class="text-center text-xs text-[#B8909A] mt-8">© <span id="footer-anio"></span> <span id="footer-nombre-copy"></span>. Todos los derechos reservados.</p>
+        <p class="text-center text-xs text-[#8C7377] pb-6">© <span id="footer-anio"></span> <span id="footer-nombre-copy"></span>. Todos los derechos reservados.</p>
     </footer>
 
     <!-- Boton flotante de WhatsApp -->
