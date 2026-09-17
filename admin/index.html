@@ -28,11 +28,11 @@
         </form>
     </div>
 
-    <script src="/admin/config.js"></script>
+    <script src="config.js"></script>
     <script>
         (async () => {
             const sesion = await Sesion.verificar();
-            if (sesion) window.location.href = '/admin/panel.html';
+            if (sesion) window.location.href = 'panel.html';
         })();
 
         document.getElementById('form-login').addEventListener('submit', async (e) => {
@@ -55,7 +55,7 @@
             }
 
             Sesion.guardar(data.token);
-            window.location.href = '/admin/panel.html';
+            window.location.href = 'panel.html';
         });
     </script>
 </body>

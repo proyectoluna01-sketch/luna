@@ -22,14 +22,14 @@ const Sesion = {
     },
     async requerir() {
         const sesion = await this.verificar();
-        if (!sesion) { window.location.href = '/admin/index.html'; return null; }
+        if (!sesion) { window.location.href = 'index.html'; return null; }
         return sesion;
     },
     async cerrar() {
         const token = this.obtener();
         if (token) await sb.rpc('admin_logout', { p_token: token });
         this.borrar();
-        window.location.href = '/admin/index.html';
+        window.location.href = 'index.html';
     }
 };
 
