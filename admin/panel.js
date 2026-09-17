@@ -140,12 +140,16 @@ function renderCategorias() {
     cont.innerHTML = categoriasCache.map(c => `
         <div class="bg-white rounded-lg border p-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full overflow-hidden bg-[#FDF6F7] border border-[#F1D9DE] shrink-0">
+                <button class="btn-cambiar-imagen-categoria h-10 w-10 rounded-full overflow-hidden bg-[#FDF6F7] border border-[#F1D9DE] shrink-0 relative group" data-id="${c.id}" title="Cambiar foto">
                     ${c.imagen_url ? `<img src="${c.imagen_url}" class="h-full w-full object-cover">` : ''}
-                </div>
+                    <span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition"><i data-lucide="camera" class="h-4 w-4 text-white pointer-events-none"></i></span>
+                </button>
                 <span class="font-medium text-slate-700">${c.nombre}</span>
             </div>
-            <button class="btn-borrar-categoria text-red-400 hover:text-red-600 p-1" data-id="${c.id}"><i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i></button>
+            <div class="flex gap-1">
+                <button class="btn-editar-categoria text-slate-400 hover:text-slate-700 p-1" data-id="${c.id}" title="Cambiar nombre"><i data-lucide="pencil" class="h-4 w-4 pointer-events-none"></i></button>
+                <button class="btn-borrar-categoria text-red-400 hover:text-red-600 p-1" data-id="${c.id}"><i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i></button>
+            </div>
         </div>
     `).join('');
     lucide.createIcons();
@@ -175,12 +179,45 @@ function configurarEventosCategorias() {
     });
 
     document.getElementById('lista-categorias').addEventListener('click', async (e) => {
-        const btn = e.target.closest('.btn-borrar-categoria');
-        if (!btn) return;
-        if (!confirm('Borrar esta categoria?')) return;
-        const { data, error } = await sb.rpc('admin_eliminar_categoria', { p_token: sesionActual.token, p_id: btn.dataset.id });
-        if (error || !data?.success) { alert(data?.message || 'Error al borrar'); return; }
-        await cargarCategorias();
+        const btnBorrar = e.target.closest('.btn-borrar-categoria');
+        const btnEditar = e.target.closest('.btn-editar-categoria');
+        const btnImagen = e.target.closest('.btn-cambiar-imagen-categoria');
+
+        if (btnBorrar) {
+            if (!confirm('Borrar esta categoria?')) return;
+            const { data, error } = await sb.rpc('admin_eliminar_categoria', { p_token: sesionActual.token, p_id: btnBorrar.dataset.id });
+            if (error || !data?.success) { alert(data?.message || 'Error al borrar'); return; }
+            await cargarCategorias();
+        }
+
+        if (btnEditar) {
+            const cat = categoriasCache.find(c => c.id === btnEditar.dataset.id);
+            const nuevoNombre = prompt('Nuevo nombre de la categoria:', cat?.nombre || '');
+            if (!nuevoNombre || !nuevoNombre.trim()) return;
+            const { data, error } = await sb.rpc('admin_guardar_categoria', { p_token: sesionActual.token, p_id: btnEditar.dataset.id, p_nombre: nuevoNombre.trim(), p_imagen_url: null });
+            if (error || !data?.success) { alert('Error al renombrar'); return; }
+            await cargarCategorias();
+        }
+
+        if (btnImagen) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+                try {
+                    const url = await subirImagen(file, 'productos');
+                    const cat = categoriasCache.find(c => c.id === btnImagen.dataset.id);
+                    const { data, error } = await sb.rpc('admin_guardar_categoria', { p_token: sesionActual.token, p_id: btnImagen.dataset.id, p_nombre: cat.nombre, p_imagen_url: url });
+                    if (error || !data?.success) { alert('Error al cambiar la foto'); return; }
+                    await cargarCategorias();
+                } catch (err) {
+                    alert('Error al subir la imagen: ' + err.message);
+                }
+            };
+            input.click();
+        }
     });
 }
 
