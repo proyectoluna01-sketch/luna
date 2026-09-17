@@ -23,11 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarCategorias();
     await cargarProductos();
     await cargarConfigPagos();
+    await cargarPedidos();
 
     configurarEventosConfig();
     configurarEventosCategorias();
     configurarEventosProductos();
     configurarEventosPagos();
+    configurarEventosPedidos();
 
     cambiarTab('config');
 });
@@ -358,5 +360,66 @@ function configurarEventosProductos() {
             if (error || !data?.success) { alert('Error al archivar'); return; }
             await cargarProductos();
         }
+    });
+}
+
+// ===================== PEDIDOS =====================
+const ESTADOS_PEDIDO = ['Pendiente', 'Preparando', 'Listo', 'Entregado'];
+const COLOR_ESTADO = {
+    Pendiente: 'bg-amber-100 text-amber-700',
+    Preparando: 'bg-sky-100 text-sky-700',
+    Listo: 'bg-violet-100 text-violet-700',
+    Entregado: 'bg-emerald-100 text-emerald-700'
+};
+
+async function cargarPedidos() {
+    const { data, error } = await sb.rpc('admin_listar_pedidos', { p_token: sesionActual.token });
+    if (error || !data?.success) return;
+    renderPedidos(data.pedidos || []);
+}
+
+function renderPedidos(pedidos) {
+    const cont = document.getElementById('lista-pedidos');
+    if (pedidos.length === 0) {
+        cont.innerHTML = '<p class="text-slate-400 text-sm">Aun no hay pedidos.</p>';
+        return;
+    }
+    cont.innerHTML = pedidos.map(p => {
+        const fecha = new Date(p.creado_en).toLocaleString('es-PA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const telLimpio = (p.telefono_invitado || '').replace(/\D/g, '');
+        const items = (p.items || []).map(i => `${i.cantidad}x ${i.nombre_producto || 'Producto'}`).join(', ');
+        return `
+        <div class="bg-white rounded-xl border border-[#F1D9DE] p-4">
+            <div class="flex justify-between items-start gap-3 mb-2">
+                <div>
+                    <p class="font-semibold text-[#7D4F58]">${p.nombre_invitado || 'Cliente'}</p>
+                    <p class="text-xs text-[#B8909A]">${fecha} · ${p.tipo_entrega || 'Tienda'}</p>
+                </div>
+                <span class="text-xs font-bold px-2 py-1 rounded-full ${COLOR_ESTADO[p.estado] || 'bg-slate-100 text-slate-600'}">${p.estado}</span>
+            </div>
+            <p class="text-sm text-slate-600 mb-1">${items}</p>
+            ${p.direccion_invitado ? `<p class="text-xs text-slate-400 mb-1">📍 ${p.direccion_invitado}</p>` : ''}
+            <div class="flex justify-between items-center mt-3">
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-[#B76E79]">$${parseFloat(p.total).toFixed(2)}</span>
+                    ${telLimpio ? `<a href="https://wa.me/${telLimpio}" target="_blank" class="text-emerald-600 text-xs font-medium hover:underline">WhatsApp</a>` : ''}
+                </div>
+                <select class="select-estado-pedido text-sm border border-[#EAC7CE] rounded-lg px-2 py-1" data-id="${p.id}">
+                    ${ESTADOS_PEDIDO.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${e}</option>`).join('')}
+                </select>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function configurarEventosPedidos() {
+    document.getElementById('lista-pedidos').addEventListener('change', async (e) => {
+        const select = e.target.closest('.select-estado-pedido');
+        if (!select) return;
+        const { data, error } = await sb.rpc('admin_actualizar_estado_pedido', {
+            p_token: sesionActual.token, p_pedido_id: select.dataset.id, p_estado: select.value
+        });
+        if (error || !data?.success) { alert('Error al actualizar el estado'); return; }
+        await cargarPedidos();
     });
 }

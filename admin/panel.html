@@ -20,6 +20,7 @@
                 <button data-tab="config" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="settings" class="h-4 w-4"></i> Mi Negocio</button>
                 <button data-tab="categorias" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="folder-tree" class="h-4 w-4"></i> Categorías</button>
                 <button data-tab="productos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="package" class="h-4 w-4"></i> Productos</button>
+                <button data-tab="pedidos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="clipboard-list" class="h-4 w-4"></i> Pedidos</button>
                 <button data-tab="pagos" class="tab-btn w-full text-left px-3 py-2 rounded-lg hover:bg-[#734953] flex items-center gap-2"><i data-lucide="credit-card" class="h-4 w-4"></i> Pagos</button>
             </nav>
             <div class="p-3 border-t border-[#734953]">
@@ -113,6 +114,12 @@
                     </button>
                 </div>
                 <div id="lista-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- TAB: Pedidos -->
+            <section id="tab-pedidos" class="tab-content hidden max-w-3xl">
+                <h2 class="text-xl font-bold text-[#7D4F58] mb-4">Pedidos</h2>
+                <div id="lista-pedidos" class="space-y-3"></div>
             </section>
 
             <!-- TAB: Pagos -->
