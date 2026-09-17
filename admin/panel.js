@@ -47,9 +47,12 @@ function mostrarMensaje(el, texto, tipo = 'success') {
 }
 
 // ===================== CONFIGURACION DEL NEGOCIO =====================
+let nombreNegocioActual = 'Nuestra tienda';
+
 async function cargarConfigNegocio() {
     const { data } = await sb.from('configuracion_negocio').select('*').eq('id', 1).single();
     if (!data) return;
+    nombreNegocioActual = data.nombre_negocio || 'Nuestra tienda';
     document.getElementById('cfg-nombre').value = data.nombre_negocio || '';
     document.getElementById('cfg-color').value = data.color_primario || '#000000';
     document.getElementById('cfg-telefono').value = data.telefono_contacto || '';
@@ -372,10 +375,13 @@ const COLOR_ESTADO = {
     Entregado: 'bg-emerald-100 text-emerald-700'
 };
 
+let pedidosCache = [];
+
 async function cargarPedidos() {
     const { data, error } = await sb.rpc('admin_listar_pedidos', { p_token: sesionActual.token });
     if (error || !data?.success) return;
-    renderPedidos(data.pedidos || []);
+    pedidosCache = data.pedidos || [];
+    renderPedidos(pedidosCache);
 }
 
 function renderPedidos(pedidos) {
@@ -400,16 +406,17 @@ function renderPedidos(pedidos) {
             <p class="text-sm text-slate-600 mb-1">${items}</p>
             ${p.direccion_invitado ? `<p class="text-xs text-slate-400 mb-1">📍 ${p.direccion_invitado}</p>` : ''}
             <div class="flex justify-between items-center mt-3">
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-[#B76E79]">$${parseFloat(p.total).toFixed(2)}</span>
-                    ${telLimpio ? `<a href="https://wa.me/${telLimpio}" target="_blank" class="text-emerald-600 text-xs font-medium hover:underline">WhatsApp</a>` : ''}
+                <span class="font-bold text-[#B76E79]">$${parseFloat(p.total).toFixed(2)}</span>
+                <div class="flex items-center gap-2">
+                    ${telLimpio ? `<button class="btn-whatsapp-pedido bg-emerald-50 text-emerald-700 text-xs font-medium px-2.5 py-1.5 rounded-lg hover:bg-emerald-100 flex items-center gap-1" data-id="${p.id}"><i data-lucide="message-circle" class="h-3.5 w-3.5 pointer-events-none"></i> Enviar detalle</button>` : ''}
+                    <select class="select-estado-pedido text-sm border border-[#EAC7CE] rounded-lg px-2 py-1" data-id="${p.id}">
+                        ${ESTADOS_PEDIDO.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${e}</option>`).join('')}
+                    </select>
                 </div>
-                <select class="select-estado-pedido text-sm border border-[#EAC7CE] rounded-lg px-2 py-1" data-id="${p.id}">
-                    ${ESTADOS_PEDIDO.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${e}</option>`).join('')}
-                </select>
             </div>
         </div>`;
     }).join('');
+    lucide.createIcons();
 }
 
 function configurarEventosPedidos() {
@@ -421,5 +428,18 @@ function configurarEventosPedidos() {
         });
         if (error || !data?.success) { alert('Error al actualizar el estado'); return; }
         await cargarPedidos();
+    });
+
+    document.getElementById('lista-pedidos').addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-whatsapp-pedido');
+        if (!btn) return;
+        const pedido = pedidosCache.find(p => p.id === btn.dataset.id);
+        if (!pedido) return;
+
+        const telLimpio = (pedido.telefono_invitado || '').replace(/\D/g, '');
+        const lineas = (pedido.items || []).map(i => `- ${i.cantidad}x ${i.nombre_producto || 'Producto'} ($${(i.cantidad * parseFloat(i.precio_unitario)).toFixed(2)})`).join('\n');
+        const mensaje = `Hola ${pedido.nombre_invitado || ''}! Aquí tienes el detalle de tu pedido en ${nombreNegocioActual}:\n\n${lineas}\n\nTotal: $${parseFloat(pedido.total).toFixed(2)}\n${pedido.direccion_invitado ? `Entrega: ${pedido.direccion_invitado}\n` : ''}Estado: ${pedido.estado}\n\n¡Gracias por tu compra!`;
+
+        window.open(`https://wa.me/${telLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
     });
 }
