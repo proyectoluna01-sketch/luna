@@ -56,23 +56,21 @@
         </nav>
     </header>
 
-    <!-- Iconos circulares de categoria -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-5 py-4 overflow-x-auto scroll-sin-barra">
-        <div id="lista-categorias-iconos" class="flex gap-4 sm:gap-6 justify-start sm:justify-center w-max mx-auto"></div>
-    </div>
-
-    <!-- Hero destacado -->
-    <section id="seccion-hero" class="max-w-6xl mx-auto px-4 sm:px-5 py-6 hidden">
-        <div class="grid sm:grid-cols-2 gap-6 items-center bg-[#FDF6F7] rounded-2xl overflow-hidden p-6 sm:p-10">
-            <div>
-                <h2 id="hero-titulo" class="font-display text-3xl sm:text-4xl font-semibold text-[#7D4F58] mb-3"></h2>
-                <p id="hero-descripcion" class="text-[#9C6B76]"></p>
-            </div>
-            <div class="aspect-[4/3] rounded-xl overflow-hidden">
-                <img id="hero-imagen" src="" class="w-full h-full object-cover">
-            </div>
+    <!-- Hero destacado: banner grande con foto de fondo y texto encima -->
+    <section id="seccion-hero" class="relative w-full h-[70vw] max-h-[420px] sm:max-h-[520px] min-h-[280px] overflow-hidden hidden">
+        <img id="hero-imagen" src="" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+        <div class="relative z-10 h-full max-w-6xl mx-auto px-5 sm:px-8 flex flex-col justify-end pb-10 sm:pb-14">
+            <h2 id="hero-titulo" class="font-display text-3xl sm:text-5xl font-semibold text-white mb-2 sm:mb-3 max-w-md"></h2>
+            <p id="hero-descripcion" class="text-white/90 max-w-sm mb-5 text-sm sm:text-base"></p>
+            <button id="btn-hero-comprar" class="self-start bg-white text-[#3E2C30] font-semibold text-sm px-6 py-3 rounded-full hover:bg-[#FDF6F7] transition">Comprar aquí</button>
         </div>
     </section>
+
+    <!-- Iconos circulares de categoria -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-5 py-6 overflow-x-auto scroll-sin-barra">
+        <div id="lista-categorias-iconos" class="flex gap-4 sm:gap-6 justify-start sm:justify-center w-max mx-auto"></div>
+    </div>
 
     <!-- Barra de orden -->
     <div class="max-w-6xl mx-auto px-4 sm:px-5 py-3 flex items-center justify-between text-sm">

@@ -232,6 +232,10 @@ function configurarEventos() {
     document.getElementById('nav-categorias-texto').addEventListener('click', manejarClickCategoria);
     document.getElementById('lista-categorias-iconos').addEventListener('click', manejarClickCategoria);
 
+    document.getElementById('btn-hero-comprar')?.addEventListener('click', () => {
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+    });
+
     document.getElementById('select-orden').addEventListener('change', (e) => {
         ordenActual = e.target.value;
         renderProductos();
