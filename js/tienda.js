@@ -34,9 +34,26 @@ async function cargarConfigNegocio() {
         document.getElementById('header-logo').src = data.logo_url;
         document.getElementById('header-logo').classList.remove('hidden');
     }
+    document.getElementById('footer-nombre').textContent = data.nombre_negocio || 'Tienda';
+    document.getElementById('footer-nombre-copy').textContent = data.nombre_negocio || 'Tienda';
+    document.getElementById('footer-anio').textContent = new Date().getFullYear();
     document.getElementById('footer-direccion').textContent = data.direccion || '';
-    document.getElementById('footer-telefono').textContent = data.telefono_contacto || '';
+    document.getElementById('footer-telefono').textContent = data.telefono_contacto ? `Tel: ${data.telefono_contacto}` : '';
+    if (data.logo_url) {
+        document.getElementById('footer-logo').src = data.logo_url;
+        document.getElementById('footer-logo').classList.remove('hidden');
+    }
     telefonoNegocio = data.telefono_contacto;
+
+    if (data.telefono_contacto) {
+        const telLimpio = data.telefono_contacto.replace(/\D/g, '');
+        const mensaje = encodeURIComponent(`Hola! Tengo una pregunta sobre ${data.nombre_negocio || 'la tienda'}.`);
+        const urlWhatsapp = `https://wa.me/${telLimpio}?text=${mensaje}`;
+        document.getElementById('footer-whatsapp-link').href = urlWhatsapp;
+        const btnFlotante = document.getElementById('btn-whatsapp-flotante');
+        btnFlotante.href = urlWhatsapp;
+        btnFlotante.classList.remove('hidden');
+    }
 
     if (data.color_primario) {
         document.documentElement.style.setProperty('--color-primario', data.color_primario);
@@ -65,13 +82,6 @@ async function cargarCategorias() {
 }
 
 function renderCategoriasNav() {
-    const navTexto = document.getElementById('nav-categorias-texto');
-    const linkTexto = (id, nombre) => `
-        <button data-cat="${id ?? ''}" class="chip-categoria transition ${categoriaActiva === id ? 'text-[var(--color-primario)] underline underline-offset-4' : 'text-[#7D4F58] hover:text-[var(--color-primario)]'}">
-            ${nombre}
-        </button>`;
-    navTexto.innerHTML = linkTexto(null, 'Inicio') + categoriasCache.map(c => linkTexto(c.id, c.nombre)).join('');
-
     const iconos = document.getElementById('lista-categorias-iconos');
     const iconoCat = (id, nombre, imagen) => `
         <button data-cat="${id ?? ''}" class="chip-categoria flex flex-col items-center gap-1.5 shrink-0">
@@ -227,9 +237,8 @@ function configurarEventos() {
         categoriaActiva = btn.dataset.cat || null;
         renderCategoriasNav();
         renderProductos();
-        window.scrollTo({ top: document.getElementById('seccion-hero').offsetTop, behavior: 'smooth' });
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
     };
-    document.getElementById('nav-categorias-texto').addEventListener('click', manejarClickCategoria);
     document.getElementById('lista-categorias-iconos').addEventListener('click', manejarClickCategoria);
 
     document.getElementById('btn-hero-comprar')?.addEventListener('click', () => {

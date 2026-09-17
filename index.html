@@ -15,7 +15,7 @@
        negocio, y se sobreescriben en runtime (tienda.js) leyendo
        configuracion_negocio.color_primario -- asi el mismo codigo sirve
        para cualquier cliente sin tocar nada aqui. */
-    :root { --color-primario: var(--color-primario); --color-primario-hover: var(--color-primario-hover); }
+    :root { --color-primario: #B76E79; --color-primario-hover: #a15c67; }
     body { font-family: 'Inter', sans-serif; }
     .font-display { font-family: 'Cormorant Garamond', serif; }
     @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -50,10 +50,10 @@
             </div>
         </div>
 
-        <!-- Nav de texto -->
-        <nav class="max-w-6xl mx-auto px-4 sm:px-5 pb-2 flex justify-center gap-4 overflow-x-auto scroll-sin-barra text-sm font-medium">
-            <div id="nav-categorias-texto" class="flex gap-4 whitespace-nowrap"></div>
-        </nav>
+        <!-- Iconos circulares de categoria -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-5 pb-3 overflow-x-auto scroll-sin-barra">
+            <div id="lista-categorias-iconos" class="flex gap-4 sm:gap-6 justify-start sm:justify-center w-max mx-auto"></div>
+        </div>
     </header>
 
     <!-- Hero destacado: banner grande con foto de fondo y texto encima -->
@@ -66,11 +66,6 @@
             <button id="btn-hero-comprar" class="self-start bg-white text-[#3E2C30] font-semibold text-sm px-6 py-3 rounded-full hover:bg-[#FDF6F7] transition">Comprar aquí</button>
         </div>
     </section>
-
-    <!-- Iconos circulares de categoria -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-5 py-6 overflow-x-auto scroll-sin-barra">
-        <div id="lista-categorias-iconos" class="flex gap-4 sm:gap-6 justify-start sm:justify-center w-max mx-auto"></div>
-    </div>
 
     <!-- Barra de orden -->
     <div class="max-w-6xl mx-auto px-4 sm:px-5 py-3 flex items-center justify-between text-sm">
@@ -91,10 +86,34 @@
         <p id="sin-productos" class="text-center text-[#B8909A] py-20 hidden">No se encontró ningún producto.</p>
     </main>
 
-    <footer class="border-t border-[#F1D9DE] py-8 text-center text-sm text-[#B8909A]">
-        <p id="footer-direccion"></p>
-        <p id="footer-telefono"></p>
+    <footer class="border-t border-[#F1D9DE] bg-[#FDF6F7] pt-10 pb-6">
+        <div class="max-w-6xl mx-auto px-5 grid sm:grid-cols-3 gap-8 text-sm">
+            <div class="flex items-start gap-3">
+                <img id="footer-logo" src="" class="h-10 w-10 rounded-full object-cover hidden">
+                <div>
+                    <p id="footer-nombre" class="font-display text-lg font-semibold text-[#7D4F58] mb-1"></p>
+                    <p id="footer-direccion" class="text-[#9C6B76]"></p>
+                </div>
+            </div>
+            <div>
+                <p class="font-semibold text-[#7D4F58] mb-2">Contacto</p>
+                <p id="footer-telefono" class="text-[#9C6B76]"></p>
+                <a id="footer-whatsapp-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-[#25D366] font-medium mt-1 hover:underline">
+                    <i data-lucide="message-circle" class="h-4 w-4"></i> Escríbenos por WhatsApp
+                </a>
+            </div>
+            <div>
+                <p class="font-semibold text-[#7D4F58] mb-2">Formas de pago</p>
+                <p class="text-[#9C6B76]">Yappy</p>
+            </div>
+        </div>
+        <p class="text-center text-xs text-[#B8909A] mt-8">© <span id="footer-anio"></span> <span id="footer-nombre-copy"></span>. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Boton flotante de WhatsApp -->
+    <a id="btn-whatsapp-flotante" href="#" target="_blank" class="fixed bottom-5 right-5 z-30 h-14 w-14 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:scale-105 transition hidden">
+        <i data-lucide="message-circle" class="h-7 w-7 text-white"></i>
+    </a>
 
     <!-- Modal producto -->
     <div id="modal-producto" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-50">
