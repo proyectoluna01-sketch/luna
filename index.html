@@ -10,6 +10,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script type="module" src="https://bt-cdn.yappy.cloud/v1/cdn/web-component-btn-yappy.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
     /* Plantilla reutilizable: estos dos valores son lo unico que cambia por
        negocio, y se sobreescriben en runtime (tienda.js) leyendo
@@ -193,6 +194,9 @@
                 <p class="text-sm text-[#9C6B76] text-center">Total a pagar: <span id="checkout-monto" class="font-semibold text-[#7D4F58]"></span></p>
                 <btn-yappy rounded="true" theme="light" id="btn-yappy-component" style="width: 100%;"></btn-yappy>
                 <p id="checkout-estado" class="text-sm text-center text-[#9C6B76]"></p>
+                <button id="btn-descargar-recibo" class="hidden w-full bg-[#3E2C30] text-white font-semibold py-3 rounded-full hover:opacity-90 transition items-center justify-center gap-2">
+                    <i data-lucide="download" class="h-5 w-5"></i> Descargar orden (PDF)
+                </button>
             </div>
         </div>
     </div>

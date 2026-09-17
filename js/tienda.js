@@ -15,6 +15,8 @@ let categoriaActiva = null;
 let ordenActual = 'recientes';
 let carrito = JSON.parse(localStorage.getItem('carrito_tienda') || '[]');
 let telefonoNegocio = null;
+let nombreNegocioActual = 'Tienda';
+let direccionNegocioActual = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await cargarConfigNegocio();
@@ -30,6 +32,8 @@ async function cargarConfigNegocio() {
     if (!data) return;
     document.getElementById('header-nombre').textContent = data.nombre_negocio || 'Tienda';
     document.title = data.nombre_negocio || 'Tienda';
+    nombreNegocioActual = data.nombre_negocio || 'Tienda';
+    direccionNegocioActual = data.direccion || '';
     if (data.logo_url) {
         document.getElementById('header-logo').src = data.logo_url;
         document.getElementById('header-logo').classList.remove('hidden');
@@ -300,8 +304,82 @@ function configurarEventos() {
     document.getElementById('btn-abrir-checkout-yappy').addEventListener('click', abrirModalCheckout);
     document.getElementById('btn-cerrar-checkout').addEventListener('click', cerrarModalCheckout);
     document.getElementById('btn-continuar-checkout').addEventListener('click', continuarCheckoutYappy);
+    document.getElementById('btn-descargar-recibo').addEventListener('click', generarReciboPDF);
 
     configurarBotonYappy();
+}
+
+// ===================== RECIBO PDF =====================
+let ultimaOrdenConfirmada = null;
+
+function generarReciboPDF() {
+    if (!ultimaOrdenConfirmada || !window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const orden = ultimaOrdenConfirmada;
+    const margenIzq = 48;
+    let y = 60;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text(nombreNegocioActual, margenIzq, y);
+    y += 20;
+    if (direccionNegocioActual) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(direccionNegocioActual, margenIzq, y);
+        y += 25;
+    } else {
+        y += 10;
+    }
+
+    doc.setDrawColor(200);
+    doc.line(margenIzq, y, 547, y);
+    y += 25;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('Orden de compra', margenIzq, y);
+    y += 20;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Referencia: ${orden.orderId || '-'}`, margenIzq, y); y += 15;
+    doc.text(`Fecha: ${new Date().toLocaleString('es-PA')}`, margenIzq, y); y += 15;
+    doc.text(`Cliente: ${orden.nombre || '-'}`, margenIzq, y); y += 15;
+    doc.text(`Teléfono: ${orden.telefono || '-'}`, margenIzq, y); y += 15;
+    if (orden.direccion) { doc.text(`Entrega: ${orden.direccion}`, margenIzq, y); y += 15; }
+    y += 10;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Producto', margenIzq, y);
+    doc.text('Cant.', 380, y);
+    doc.text('Subtotal', 460, y);
+    y += 8;
+    doc.line(margenIzq, y, 547, y);
+    y += 18;
+
+    doc.setFont('helvetica', 'normal');
+    orden.items.forEach(item => {
+        doc.text(item.nombre, margenIzq, y, { maxWidth: 300 });
+        doc.text(String(item.cantidad), 380, y);
+        doc.text(`$${(item.precio * item.cantidad).toFixed(2)}`, 460, y);
+        y += 20;
+    });
+
+    y += 10;
+    doc.line(margenIzq, y, 547, y);
+    y += 22;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(`Total: $${parseFloat(orden.total).toFixed(2)}`, margenIzq, y);
+
+    y += 40;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(10);
+    doc.text('¡Gracias por tu compra!', margenIzq, y);
+
+    doc.save(`orden-${orden.orderId || Date.now()}.pdf`);
 }
 
 // ===================== CHECKOUT CON YAPPY =====================
@@ -315,6 +393,9 @@ function abrirModalCheckout() {
     document.getElementById('checkout-yappy-wrapper').classList.add('hidden');
     document.getElementById('checkout-yappy-wrapper').classList.remove('flex');
     document.getElementById('checkout-error').classList.add('hidden');
+    document.getElementById('checkout-estado').textContent = '';
+    document.getElementById('btn-descargar-recibo').classList.add('hidden');
+    document.getElementById('btn-descargar-recibo').classList.remove('flex');
     document.getElementById('modal-checkout').classList.remove('hidden');
     document.getElementById('modal-checkout').classList.add('flex');
 }
@@ -394,9 +475,21 @@ function configurarBotonYappy() {
         btnYappy.setAttribute('isButtonLoading', 'false');
         document.getElementById('checkout-estado').textContent = '¡Pago confirmado! Gracias por tu compra.';
         document.getElementById('checkout-estado').className = 'text-sm text-center text-emerald-600 font-semibold';
+
+        ultimaOrdenConfirmada = {
+            orderId: yappyOrderIdActual,
+            nombre: document.getElementById('checkout-nombre').value.trim(),
+            telefono: document.getElementById('checkout-telefono').value.trim(),
+            direccion: document.getElementById('checkout-direccion').value.trim(),
+            items: carrito.map(i => ({ ...i })),
+            total: yappyMontoActivo
+        };
+        document.getElementById('btn-descargar-recibo').classList.remove('hidden');
+        document.getElementById('btn-descargar-recibo').classList.add('flex');
+
         carrito = [];
         guardarCarrito();
-        setTimeout(() => { cerrarModalCheckout(); cerrarCarrito(); }, 2500);
+        cerrarCarrito();
     });
 
     btnYappy.addEventListener('eventError', () => {
