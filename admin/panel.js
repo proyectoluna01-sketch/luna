@@ -1,10 +1,11 @@
-let sesionActual = null;
+﻿let sesionActual = null;
 let categoriasCache = [];
 let productosCache = [];
 let logoNuevoUrl = null;
 let productoImagenNuevaUrl = null;
 let heroImagenNuevaUrl = null;
 let nuevaCategoriaImagenUrl = null;
+let categoriaEditImagenNuevaUrl = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     sesionActual = await Sesion.requerir();
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     configurarEventosConfig();
     configurarEventosCategorias();
+    configurarModalCategoria();
     configurarEventosProductos();
     configurarEventosPagos();
     configurarEventosPedidos();
@@ -154,7 +156,7 @@ function renderCategorias() {
                 <span class="font-medium text-slate-700">${c.nombre}</span>
             </div>
             <div class="flex gap-1">
-                <button class="btn-editar-categoria text-slate-400 hover:text-slate-700 p-1" data-id="${c.id}" title="Cambiar nombre"><i data-lucide="pencil" class="h-4 w-4 pointer-events-none"></i></button>
+                <button class="btn-editar-categoria text-slate-400 hover:text-slate-700 p-1" data-id="${c.id}" title="Editar categoria"><i data-lucide="pencil" class="h-4 w-4 pointer-events-none"></i></button>
                 <button class="btn-borrar-categoria text-red-400 hover:text-red-600 p-1" data-id="${c.id}"><i data-lucide="trash-2" class="h-4 w-4 pointer-events-none"></i></button>
             </div>
         </div>
@@ -199,11 +201,7 @@ function configurarEventosCategorias() {
 
         if (btnEditar) {
             const cat = categoriasCache.find(c => c.id === btnEditar.dataset.id);
-            const nuevoNombre = prompt('Nuevo nombre de la categoria:', cat?.nombre || '');
-            if (!nuevoNombre || !nuevoNombre.trim()) return;
-            const { data, error } = await sb.rpc('admin_guardar_categoria', { p_token: sesionActual.token, p_id: btnEditar.dataset.id, p_nombre: nuevoNombre.trim(), p_imagen_url: null });
-            if (error || !data?.success) { alert('Error al renombrar'); return; }
-            await cargarCategorias();
+            if (cat) abrirModalCategoria(cat);
         }
 
         if (btnImagen) {
@@ -225,6 +223,69 @@ function configurarEventosCategorias() {
             };
             input.click();
         }
+    });
+}
+
+// Modal "Editar categoria": nombre + foto. Si no se elige una foto nueva, se manda la actual
+// para que guardar el nombre nunca borre la foto.
+function abrirModalCategoria(cat) {
+    categoriaEditImagenNuevaUrl = null;
+    document.getElementById('cat-edit-id').value = cat.id;
+    document.getElementById('cat-edit-nombre').value = cat.nombre || '';
+    const preview = document.getElementById('cat-edit-preview');
+    if (cat.imagen_url) { preview.src = cat.imagen_url; preview.classList.remove('hidden'); }
+    else { preview.removeAttribute('src'); preview.classList.add('hidden'); }
+    document.getElementById('cat-edit-imagen').value = '';
+    document.getElementById('cat-edit-msg').classList.add('hidden');
+    document.getElementById('btn-guardar-categoria').disabled = false;
+    document.getElementById('modal-categoria').classList.remove('hidden');
+    document.getElementById('modal-categoria').classList.add('flex');
+}
+
+function cerrarModalCategoria() {
+    document.getElementById('modal-categoria').classList.add('hidden');
+    document.getElementById('modal-categoria').classList.remove('flex');
+}
+
+function configurarModalCategoria() {
+    document.getElementById('btn-cancelar-categoria').addEventListener('click', cerrarModalCategoria);
+
+    document.getElementById('cat-edit-imagen').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const btn = document.getElementById('btn-guardar-categoria');
+        const msg = document.getElementById('cat-edit-msg');
+        btn.disabled = true;
+        msg.textContent = 'Subiendo foto...';
+        msg.classList.remove('hidden');
+        try {
+            categoriaEditImagenNuevaUrl = await subirImagen(file, 'productos');
+            const preview = document.getElementById('cat-edit-preview');
+            preview.src = categoriaEditImagenNuevaUrl;
+            preview.classList.remove('hidden');
+            msg.classList.add('hidden');
+        } catch (err) {
+            categoriaEditImagenNuevaUrl = null;
+            msg.textContent = 'Error al subir la imagen: ' + err.message;
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById('btn-guardar-categoria').addEventListener('click', async () => {
+        const id = document.getElementById('cat-edit-id').value;
+        const nombre = document.getElementById('cat-edit-nombre').value.trim();
+        if (!nombre) { alert('Escribe un nombre para la categoria'); return; }
+        const cat = categoriasCache.find(c => c.id === id);
+        const { data, error } = await sb.rpc('admin_guardar_categoria', {
+            p_token: sesionActual.token,
+            p_id: id,
+            p_nombre: nombre,
+            p_imagen_url: categoriaEditImagenNuevaUrl || cat?.imagen_url || null
+        });
+        if (error || !data?.success) { alert('Error al guardar la categoria'); return; }
+        cerrarModalCategoria();
+        await cargarCategorias();
     });
 }
 

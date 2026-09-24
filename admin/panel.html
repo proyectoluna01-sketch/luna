@@ -172,6 +172,32 @@
         </div>
     </div>
 
+    <!-- Modal editar categoria -->
+    <div id="modal-categoria" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 border border-[#F1D9DE]">
+            <h3 class="text-lg font-bold text-[#7D4F58] mb-4">Editar categoría</h3>
+            <div class="space-y-3">
+                <input type="hidden" id="cat-edit-id">
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Nombre</label>
+                    <input type="text" id="cat-edit-nombre" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Foto</label>
+                    <div class="flex items-center gap-3 mt-1">
+                        <img id="cat-edit-preview" src="" class="h-14 w-14 rounded-full object-cover border border-[#F1D9DE] bg-[#FDF6F7] hidden">
+                        <input type="file" id="cat-edit-imagen" accept="image/*" class="text-sm">
+                    </div>
+                    <p id="cat-edit-msg" class="text-xs text-[#B8909A] mt-1 hidden"></p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="btn-cancelar-categoria" class="px-4 py-2 rounded-lg border border-[#EAC7CE] text-[#7D4F58] hover:bg-[#FDF6F7]">Cancelar</button>
+                <button id="btn-guardar-categoria" class="px-4 py-2 rounded-lg bg-[#B76E79] text-white font-semibold hover:bg-[#a15c67]">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script src="panel.js"></script>
 </body>
