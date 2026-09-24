@@ -168,15 +168,21 @@
     <!-- Modal producto -->
     <div id="modal-producto" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden grid sm:grid-cols-2 max-h-[90vh] overflow-y-auto">
-            <div class="bg-[#FDF6F7] aspect-square flex items-center justify-center">
-                <img id="modal-producto-imagen" src="" class="w-full h-full object-cover">
+            <div>
+                <div class="bg-[#FDF6F7] aspect-square flex items-center justify-center">
+                    <img id="modal-producto-imagen" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                <!-- Miniaturas (solo si el producto tiene fotos adicionales) -->
+                <div id="modal-producto-miniaturas" class="hidden flex gap-2 p-3 overflow-x-auto scroll-sin-barra"></div>
             </div>
             <div class="p-6 sm:p-8 flex flex-col">
                 <button id="btn-cerrar-modal-producto" class="self-end text-[#B8909A] hover:text-[#7D4F58]"><i data-lucide="x" class="h-5 w-5"></i></button>
                 <p id="modal-producto-categoria" class="text-xs uppercase tracking-widest text-[#B8909A] mb-1"></p>
                 <h3 id="modal-producto-nombre" class="font-display text-2xl font-semibold text-[#7D4F58] mb-3"></h3>
-                <p id="modal-producto-precio" class="text-xl font-semibold text-[var(--color-primario)] mb-6"></p>
-                <button id="btn-agregar-carrito" class="mt-auto w-full bg-[var(--color-primario)] text-white font-semibold py-3 rounded-full hover:bg-[var(--color-primario-hover)] transition">Agregar al carrito</button>
+                <p id="modal-producto-precio" class="text-xl font-semibold text-[var(--color-primario)] mb-3"></p>
+                <p id="modal-producto-stock" class="hidden text-xs font-semibold mb-3"></p>
+                <p id="modal-producto-descripcion" class="hidden text-sm text-[#7D4F58] whitespace-pre-line mb-6 leading-relaxed"></p>
+                <button id="btn-agregar-carrito" class="mt-auto w-full bg-[var(--color-primario)] text-white font-semibold py-3 rounded-full hover:bg-[var(--color-primario-hover)] transition disabled:opacity-40 disabled:cursor-not-allowed">Agregar al carrito</button>
             </div>
         </div>
     </div>

@@ -19,6 +19,10 @@ function normalizarTexto(texto) {
     return String(texto ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }
 
+// stock null = sin control de stock (siempre disponible); 0 = agotado
+const estaAgotado = (p) => p.stock !== null && p.stock !== undefined && p.stock <= 0;
+const cantidadMaxima = (p) => (p.stock === null || p.stock === undefined) ? 99 : p.stock;
+
 const DIAS_PRODUCTO_NUEVO = 14;
 const esProductoNuevo = (p) => p.creado_en && (Date.now() - new Date(p.creado_en).getTime()) < DIAS_PRODUCTO_NUEVO * 86400000;
 
@@ -164,13 +168,15 @@ function renderProductos() {
     grid.innerHTML = filtrados.map((p, i) => `
         <div class="tarjeta-producto group" data-id="${p.id}" style="animation-delay:${Math.min(i, 12) * 40}ms">
             <div class="relative aspect-square bg-[#FDF6F7] rounded-xl overflow-hidden mb-3 cursor-pointer">
-                ${esProductoNuevo(p) ? `<span class="absolute top-2 left-2 z-10 bg-[var(--color-primario)] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">Nuevo</span>` : ''}
+                ${estaAgotado(p)
+                    ? `<span class="absolute top-2 left-2 z-10 bg-[#3E2C30] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">Agotado</span>`
+                    : (esProductoNuevo(p) ? `<span class="absolute top-2 left-2 z-10 bg-[var(--color-primario)] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">Nuevo</span>` : '')}
                 ${p.imagen_url
-                    ? `<img src="${p.imagen_url}" alt="${escaparHtml(p.nombre)}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`
+                    ? `<img src="${p.imagen_url}" alt="${escaparHtml(p.nombre)}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ${estaAgotado(p) ? 'opacity-50' : ''}">`
                     : `<div class="w-full h-full flex items-center justify-center"><i data-lucide="image" class="h-8 w-8 text-[#E3BFC6]"></i></div>`}
-                <button class="btn-agregar-rapido absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[var(--color-primario)] hover:bg-[var(--color-primario)] hover:text-white transition sm:opacity-0 sm:group-hover:opacity-100" data-id="${p.id}" title="Agregar al carrito">
+                ${estaAgotado(p) ? '' : `<button class="btn-agregar-rapido absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[var(--color-primario)] hover:bg-[var(--color-primario)] hover:text-white transition sm:opacity-0 sm:group-hover:opacity-100" data-id="${p.id}" title="Agregar al carrito">
                     <i data-lucide="shopping-bag" class="h-4 w-4 pointer-events-none"></i>
-                </button>
+                </button>`}
             </div>
             <div class="cursor-pointer">
                 <p class="text-sm text-[#7D4F58] font-medium truncate">${escaparHtml(p.nombre)}</p>
@@ -187,10 +193,47 @@ function abrirModalProducto(id) {
     const p = productosCache.find(x => x.id === id);
     if (!p) return;
     productoModalActual = p;
-    document.getElementById('modal-producto-imagen').src = p.imagen_url || '';
+    const fotos = [p.imagen_url, ...(Array.isArray(p.galeria) ? p.galeria : [])].filter(Boolean);
+    const imgPrincipal = document.getElementById('modal-producto-imagen');
+    imgPrincipal.src = fotos[0] || '';
+    imgPrincipal.alt = p.nombre;
+    const miniaturas = document.getElementById('modal-producto-miniaturas');
+    if (fotos.length > 1) {
+        miniaturas.innerHTML = fotos.map((url, i) => `
+            <button type="button" class="miniatura-foto shrink-0 h-14 w-14 rounded-lg overflow-hidden border-2 ${i === 0 ? 'border-[var(--color-primario)]' : 'border-transparent'}" data-url="${escaparHtml(url)}">
+                <img src="${escaparHtml(url)}" alt="" loading="lazy" class="h-full w-full object-cover pointer-events-none">
+            </button>`).join('');
+        miniaturas.classList.remove('hidden');
+    } else {
+        miniaturas.innerHTML = '';
+        miniaturas.classList.add('hidden');
+    }
     document.getElementById('modal-producto-categoria').textContent = p.categorias?.nombre || '';
     document.getElementById('modal-producto-nombre').textContent = p.nombre;
     document.getElementById('modal-producto-precio').textContent = `$${parseFloat(p.precio_venta).toFixed(2)}`;
+
+    const desc = document.getElementById('modal-producto-descripcion');
+    desc.textContent = p.descripcion || '';
+    desc.classList.toggle('hidden', !p.descripcion);
+
+    const aviso = document.getElementById('modal-producto-stock');
+    const btnAgregar = document.getElementById('btn-agregar-carrito');
+    aviso.className = 'text-xs font-semibold mb-3';
+    if (estaAgotado(p)) {
+        aviso.textContent = 'Agotado';
+        aviso.classList.add('text-red-600');
+        btnAgregar.disabled = true;
+        btnAgregar.textContent = 'Agotado';
+    } else {
+        btnAgregar.disabled = false;
+        btnAgregar.textContent = 'Agregar al carrito';
+        if (p.stock !== null && p.stock !== undefined && p.stock <= 5) {
+            aviso.textContent = p.stock === 1 ? 'Última unidad' : `Quedan ${p.stock} unidades`;
+            aviso.classList.add('text-amber-600');
+        } else {
+            aviso.classList.add('hidden');
+        }
+    }
     document.getElementById('modal-producto').classList.remove('hidden');
     document.getElementById('modal-producto').classList.add('flex');
 }
@@ -206,7 +249,12 @@ function guardarCarrito() {
 }
 
 function agregarAlCarrito(producto) {
+    if (estaAgotado(producto)) { mostrarAviso('Este producto está agotado'); return; }
     const existente = carrito.find(i => i.id === producto.id);
+    if (existente && existente.cantidad + 1 > cantidadMaxima(producto)) {
+        mostrarAviso(`Solo quedan ${cantidadMaxima(producto)} unidades`);
+        return;
+    }
     if (existente) existente.cantidad += 1;
     else carrito.push({ id: producto.id, nombre: producto.nombre, precio: parseFloat(producto.precio_venta), imagen_url: producto.imagen_url, cantidad: 1 });
     guardarCarrito();
@@ -215,14 +263,17 @@ function agregarAlCarrito(producto) {
 
 // Aviso breve "Agregado" + salto del contador del carrito (en vez de abrir el panel de golpe)
 let temporizadorAviso = null;
-function mostrarAvisoAgregado(nombre) {
+function mostrarAviso(texto) {
     const toast = document.getElementById('toast-tienda');
-    if (toast) {
-        document.getElementById('toast-tienda-texto').textContent = `Agregado: ${nombre}`;
-        toast.classList.remove('opacity-0', 'translate-y-2');
-        clearTimeout(temporizadorAviso);
-        temporizadorAviso = setTimeout(() => toast.classList.add('opacity-0', 'translate-y-2'), 1800);
-    }
+    if (!toast) return;
+    document.getElementById('toast-tienda-texto').textContent = texto;
+    toast.classList.remove('opacity-0', 'translate-y-2');
+    clearTimeout(temporizadorAviso);
+    temporizadorAviso = setTimeout(() => toast.classList.add('opacity-0', 'translate-y-2'), 1800);
+}
+
+function mostrarAvisoAgregado(nombre) {
+    mostrarAviso(`Agregado: ${nombre}`);
     const contador = document.getElementById('carrito-contador');
     contador.classList.remove('contador-salto');
     void contador.offsetWidth; // reinicia la animacion si se agrega varias veces seguidas
@@ -232,6 +283,11 @@ function mostrarAvisoAgregado(nombre) {
 function cambiarCantidad(id, delta) {
     const item = carrito.find(i => i.id === id);
     if (!item) return;
+    const producto = productosCache.find(p => p.id === id);
+    if (delta > 0 && producto && item.cantidad + delta > cantidadMaxima(producto)) {
+        mostrarAviso(`Solo quedan ${cantidadMaxima(producto)} unidades`);
+        return;
+    }
     item.cantidad += delta;
     if (item.cantidad <= 0) carrito = carrito.filter(i => i.id !== id);
     guardarCarrito();
@@ -343,6 +399,17 @@ function configurarEventos() {
         }
         const card = e.target.closest('.tarjeta-producto');
         if (card) abrirModalProducto(card.dataset.id);
+    });
+
+    // Miniaturas del producto: cambian la foto grande
+    document.getElementById('modal-producto-miniaturas').addEventListener('click', (e) => {
+        const btn = e.target.closest('.miniatura-foto');
+        if (!btn) return;
+        document.getElementById('modal-producto-imagen').src = btn.dataset.url;
+        document.querySelectorAll('#modal-producto-miniaturas .miniatura-foto').forEach(b => {
+            b.classList.toggle('border-[var(--color-primario)]', b === btn);
+            b.classList.toggle('border-transparent', b !== btn);
+        });
     });
 
     document.getElementById('btn-cerrar-modal-producto').addEventListener('click', cerrarModalProducto);
@@ -495,7 +562,8 @@ async function continuarCheckoutYappy() {
     });
 
     if (error || !orderId) {
-        errorEl.textContent = 'No se pudo iniciar el pago. Intenta de nuevo.';
+        // Los mensajes de la base de datos (sin stock, precio cambio, etc.) ya vienen en lenguaje claro
+        errorEl.textContent = error?.message || 'No se pudo iniciar el pago. Intenta de nuevo.';
         errorEl.classList.remove('hidden');
         return;
     }

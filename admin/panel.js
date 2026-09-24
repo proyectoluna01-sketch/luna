@@ -316,6 +316,9 @@ function renderProductos() {
             <div class="p-3">
                 <p class="font-semibold text-slate-700 truncate">${p.nombre}</p>
                 <p class="text-xs text-slate-400">${p.categorias?.nombre || 'Sin categoria'}</p>
+                ${p.stock === null || p.stock === undefined ? '' : p.stock === 0
+                    ? '<span class="inline-block mt-1 text-[10px] font-bold uppercase bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Agotado</span>'
+                    : `<span class="inline-block mt-1 text-[10px] font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">Stock: ${p.stock}</span>`}
                 <div class="flex justify-between items-center mt-2">
                     <span class="font-bold text-emerald-700">$${parseFloat(p.precio_venta).toFixed(2)}</span>
                     <div class="flex gap-1">
@@ -329,8 +332,26 @@ function renderProductos() {
     lucide.createIcons();
 }
 
+const MAX_FOTOS_GALERIA = 8;
+let galeriaProducto = [];   // URLs de las fotos adicionales del producto que se esta editando
+
+function renderGaleriaAdmin() {
+    const cont = document.getElementById('prod-galeria');
+    cont.innerHTML = galeriaProducto.map((url, i) => `
+        <div class="relative h-16 w-16">
+            <img src="${url}" class="h-16 w-16 rounded-lg object-cover border border-[#F1D9DE]">
+            <button type="button" class="btn-quitar-foto-galeria absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-red-500 text-white text-xs leading-none flex items-center justify-center" data-i="${i}" aria-label="Quitar foto">&times;</button>
+        </div>`).join('');
+}
+
 function abrirModalProducto(producto = null) {
     productoImagenNuevaUrl = null;
+    galeriaProducto = Array.isArray(producto?.galeria) ? [...producto.galeria] : [];
+    renderGaleriaAdmin();
+    document.getElementById('prod-input-galeria').value = '';
+    document.getElementById('prod-galeria-msg').classList.add('hidden');
+    document.getElementById('prod-descripcion').value = producto?.descripcion || '';
+    document.getElementById('prod-stock').value = producto?.stock ?? '';
     document.getElementById('modal-producto-titulo').textContent = producto ? 'Editar producto' : 'Nuevo producto';
     document.getElementById('prod-id').value = producto?.id || '';
     document.getElementById('prod-nombre').value = producto?.nombre || '';
@@ -385,13 +406,45 @@ function configurarEventosProductos() {
         }
     });
 
+    // Fotos adicionales: se suben una por una y se agregan a la lista (maximo 8)
+    document.getElementById('prod-input-galeria').addEventListener('change', async (e) => {
+        const archivos = Array.from(e.target.files || []);
+        e.target.value = '';
+        const msg = document.getElementById('prod-galeria-msg');
+        const btnGuardar = document.getElementById('btn-guardar-producto');
+        if (archivos.length === 0) return;
+        btnGuardar.disabled = true;
+        for (const file of archivos) {
+            if (galeriaProducto.length >= MAX_FOTOS_GALERIA) { msg.textContent = `Maximo ${MAX_FOTOS_GALERIA} fotos adicionales.`; msg.classList.remove('hidden'); break; }
+            msg.textContent = 'Subiendo foto...'; msg.classList.remove('hidden');
+            try {
+                galeriaProducto.push(await subirImagen(file, 'productos'));
+                renderGaleriaAdmin();
+                msg.classList.add('hidden');
+            } catch (err) {
+                msg.textContent = 'Error al subir la imagen: ' + err.message;
+            }
+        }
+        btnGuardar.disabled = false;
+    });
+
+    document.getElementById('prod-galeria').addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-quitar-foto-galeria');
+        if (!btn) return;
+        galeriaProducto.splice(parseInt(btn.dataset.i, 10), 1);
+        renderGaleriaAdmin();
+    });
+
     document.getElementById('btn-guardar-producto').addEventListener('click', async () => {
         const id = document.getElementById('prod-id').value || null;
         const nombre = document.getElementById('prod-nombre').value.trim();
         const categoriaId = document.getElementById('prod-categoria').value || null;
         const precio = parseFloat(document.getElementById('prod-precio').value);
+        const stockTexto = document.getElementById('prod-stock').value.trim();
+        const stock = stockTexto === '' ? null : parseInt(stockTexto, 10);
 
         if (!nombre || isNaN(precio)) { alert('Nombre y precio son obligatorios'); return; }
+        if (stock !== null && (isNaN(stock) || stock < 0)) { alert('El stock debe ser 0 o mas, o dejarlo vacio'); return; }
 
         const { data, error } = await sb.rpc('admin_guardar_producto', {
             p_token: sesionActual.token,
@@ -401,11 +454,13 @@ function configurarEventosProductos() {
             p_subcategoria_id: null,
             p_precio_venta: precio,
             p_imagen_url: productoImagenNuevaUrl,
-            p_galeria: null,
-            p_archivado: false
+            p_galeria: galeriaProducto,
+            p_archivado: false,
+            p_descripcion: document.getElementById('prod-descripcion').value.trim() || null,
+            p_stock: stock
         });
 
-        if (error || !data?.success) { alert('Error al guardar el producto'); return; }
+        if (error || !data?.success) { alert(data?.message || 'Error al guardar el producto'); return; }
         cerrarModalProducto();
         await cargarProductos();
     });

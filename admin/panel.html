@@ -141,7 +141,7 @@
 
     <!-- Modal producto -->
     <div id="modal-producto" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 border border-[#F1D9DE]">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 border border-[#F1D9DE] max-h-[92vh] overflow-y-auto">
             <h3 id="modal-producto-titulo" class="text-lg font-bold text-[#7D4F58] mb-4">Nuevo producto</h3>
             <div class="space-y-3">
                 <input type="hidden" id="prod-id">
@@ -158,11 +158,26 @@
                     <input type="number" step="0.01" id="prod-precio" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
                 </div>
                 <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Descripción</label>
+                    <textarea id="prod-descripcion" rows="3" maxlength="1000" placeholder="Material, medidas, cuidados..." class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]" style="font-size:16px;"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Stock (unidades disponibles)</label>
+                    <input type="number" min="0" step="1" id="prod-stock" placeholder="Vacío = sin límite" class="w-full mt-1 border border-[#EAC7CE] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B76E79]">
+                    <p class="text-xs text-[#B8909A] mt-1">Con 0 el producto aparece como "Agotado". Déjalo vacío si no llevas control de stock.</p>
+                </div>
+                <div>
                     <label class="text-sm font-semibold text-[#9C6B76]">Foto principal</label>
                     <div class="flex items-center gap-3 mt-1">
                         <img id="prod-preview-imagen" src="" class="h-14 w-14 rounded-lg object-cover border border-[#F1D9DE] bg-[#FDF6F7] hidden">
                         <input type="file" id="prod-input-imagen" accept="image/*" class="text-sm">
                     </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-[#9C6B76]">Fotos adicionales (hasta 8)</label>
+                    <div id="prod-galeria" class="flex flex-wrap gap-2 mt-1"></div>
+                    <input type="file" id="prod-input-galeria" accept="image/*" multiple class="text-sm mt-2">
+                    <p id="prod-galeria-msg" class="text-xs text-[#B8909A] mt-1 hidden"></p>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
