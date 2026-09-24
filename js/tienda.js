@@ -68,28 +68,36 @@ async function cargarConfigNegocio() {
     }
     telefonoNegocio = data.telefono_contacto;
 
+    // WhatsApp: boton flotante, boton del footer (solo con telefono) y su icono en las redes
+    const ICONO_WHATSAPP = '<svg viewBox="0 0 24 24" class="h-[18px] w-[18px] fill-current" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
+    // El icono de Instagram no viene en el set base de lucide, asi que se usa un SVG propio.
+    const ICONO_INSTAGRAM = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>';
+    const redes = [];
+    let urlWhatsapp = null;
+
     if (data.telefono_contacto) {
         const telLimpio = data.telefono_contacto.replace(/\D/g, '');
         const mensaje = encodeURIComponent(`Hola! Tengo una pregunta sobre ${data.nombre_negocio || 'la tienda'}.`);
-        const urlWhatsapp = `https://wa.me/${telLimpio}?text=${mensaje}`;
+        urlWhatsapp = `https://wa.me/${telLimpio}?text=${mensaje}`;
         document.getElementById('footer-whatsapp-link').href = urlWhatsapp;
         const btnFlotante = document.getElementById('btn-whatsapp-flotante');
         btnFlotante.href = urlWhatsapp;
         btnFlotante.classList.remove('hidden');
+        redes.push({ url: urlWhatsapp, icono: ICONO_WHATSAPP, nombre: 'WhatsApp', fondo: '#25D366' });
+    } else {
+        document.getElementById('footer-whatsapp-link').style.display = 'none';
     }
 
-    if (data.instagram_url) {
-        // El icono de Instagram no viene en el set base de lucide (lo movieron
-        // a un paquete aparte), asi que se usa un SVG propio en vez del data-lucide.
-        document.getElementById('footer-redes').innerHTML = `
-            <a href="${data.instagram_url}" target="_blank" class="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-            </a>`;
+    instagramUrlActual = /^https?:\/\//i.test(data.instagram_url || '') ? data.instagram_url : null;
+    if (instagramUrlActual) {
+        redes.push({ url: instagramUrlActual, icono: ICONO_INSTAGRAM, nombre: 'Instagram',
+                     fondo: 'linear-gradient(45deg,#F9CE34,#EE2A7B 55%,#6228D7)' });
     }
+
+    document.getElementById('footer-redes').innerHTML = redes.map(r => `
+        <a href="${escaparHtml(r.url)}" target="_blank" rel="noopener" aria-label="${r.nombre}" title="${r.nombre}"
+           class="h-10 w-10 rounded-full text-white flex items-center justify-center shadow-md shadow-black/20 transition hover:-translate-y-0.5 hover:brightness-110"
+           style="background:${r.fondo};">${r.icono}</a>`).join('');
 
     if (data.color_primario) {
         document.documentElement.style.setProperty('--color-primario', data.color_primario);
@@ -116,7 +124,17 @@ async function cargarConfigNegocio() {
         const track = document.getElementById('marquee-track');
         const item = `<span class="mx-6">${data.mensaje_promocional}</span>`;
         track.innerHTML = item.repeat(8);
-        document.getElementById('barra-promo').classList.remove('hidden');
+        const barraPromo = document.getElementById('barra-promo');
+        barraPromo.classList.remove('hidden');
+        // Si el admin eligio un destino, la barra es un enlace a esa seccion
+        promoDestino = data.promo_destino || null;
+        if (promoDestino) {
+            barraPromo.style.cursor = 'pointer';
+            barraPromo.setAttribute('role', 'link');
+            barraPromo.setAttribute('tabindex', '0');
+            barraPromo.addEventListener('click', irAlDestinoDeLaBarra);
+            barraPromo.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); irAlDestinoDeLaBarra(); } });
+        }
     }
 
     if (data.hero_titulo || data.hero_imagen_url) {
@@ -124,6 +142,28 @@ async function cargarConfigNegocio() {
         document.getElementById('hero-descripcion').textContent = data.hero_descripcion || '';
         if (data.hero_imagen_url) document.getElementById('hero-imagen').src = data.hero_imagen_url;
         document.getElementById('seccion-hero').classList.remove('hidden');
+    }
+}
+
+// A donde lleva la barra promocional: 'productos' | 'cat:<id>' | 'contacto' | 'instagram' (configurable en el admin)
+let promoDestino = null;
+let instagramUrlActual = null;
+
+function irAlDestinoDeLaBarra() {
+    if (!promoDestino) return;
+    if (promoDestino === 'productos' || promoDestino.startsWith('cat:')) {
+        const idCategoria = promoDestino.startsWith('cat:') ? promoDestino.slice(4) : null;
+        categoriaActiva = idCategoria && categoriasCache.some(c => c.id === idCategoria) ? idCategoria : null;
+        busqueda = '';
+        const input = document.getElementById('input-busqueda');
+        if (input) input.value = '';
+        renderCategoriasNav();
+        renderProductos();
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+    } else if (promoDestino === 'contacto') {
+        document.getElementById('footer-contacto')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (promoDestino === 'instagram' && instagramUrlActual) {
+        window.open(instagramUrlActual, '_blank', 'noopener');
     }
 }
 

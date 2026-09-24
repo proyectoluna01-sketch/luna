@@ -57,6 +57,8 @@ async function cargarConfigNegocio() {
     nombreNegocioActual = data.nombre_negocio || 'Nuestra tienda';
     document.getElementById('cfg-nombre').value = data.nombre_negocio || '';
     document.getElementById('cfg-color').value = data.color_primario || '#000000';
+    promoDestinoActual = data.promo_destino || '';
+    document.getElementById('cfg-promo-destino').value = promoDestinoActual;   // se completa al cargar las categorias
     document.getElementById('cfg-color-footer').value = data.color_footer || '#3E2C30';
     // Categorias: sin color propio = igual al color principal de la pagina
     const igual = !data.color_categorias;
@@ -113,6 +115,7 @@ function configurarEventosConfig() {
             p_hero_descripcion: document.getElementById('cfg-hero-descripcion').value.trim() || null,
             p_hero_imagen_url: heroImagenNuevaUrl,
             p_instagram_url: document.getElementById('cfg-instagram').value.trim() || null,
+            p_promo_destino: document.getElementById('cfg-promo-destino').value || null,
             p_color_footer: document.getElementById('cfg-color-footer').value,
             p_color_categorias: document.getElementById('cfg-color-categorias-igual').checked ? null : document.getElementById('cfg-color-categorias').value
         });
@@ -151,6 +154,27 @@ async function cargarCategorias() {
     categoriasCache = data || [];
     renderCategorias();
     renderSelectCategoriasProducto();
+    renderSelectPromoDestino();
+}
+
+// Opciones de "a donde lleva la barra promocional": fijas + una por categoria. La opcion guardada se
+// conserva aunque las categorias lleguen despues de la configuracion.
+let promoDestinoActual = '';
+function renderSelectPromoDestino() {
+    const select = document.getElementById('cfg-promo-destino');
+    const seleccionado = select.value || promoDestinoActual;
+    select.innerHTML =
+        '<option value="">A ningún lado (solo texto)</option>' +
+        '<option value="productos">Todos los productos</option>' +
+        categoriasCache.map(c => `<option value="cat:${c.id}">Categoría: ${escaparHtmlAdmin(c.nombre)}</option>`).join('') +
+        '<option value="contacto">Contacto (pie de página)</option>' +
+        '<option value="instagram">Instagram</option>';
+    select.value = seleccionado;
+    if (select.value !== seleccionado) select.value = '';   // la categoria guardada ya no existe
+}
+
+function escaparHtmlAdmin(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function renderCategorias() {
