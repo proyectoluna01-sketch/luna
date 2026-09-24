@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Ear-cuff">
+  <defs><linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBE9EC"/><stop offset="1" stop-color="#F0C4CD"/></linearGradient></defs>
+  <rect width="200" height="200" fill="url(#f)"/>
+  <path d="M70 150 C40 130 44 60 90 48 C132 38 158 70 148 104 C144 118 132 124 128 138 C124 152 106 160 92 158" fill="none" stroke="#B76E79" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+  <path d="M86 62 C112 54 140 72 140 96" fill="none" stroke="#B76E79" stroke-width="4" stroke-linecap="round" opacity=".4"/>
+  <path d="M96 52 C124 44 154 70 146 100" fill="none" stroke="#C9A25B" stroke-width="9" stroke-linecap="round"/>
+  <path d="M96 52 C124 44 154 70 146 100" fill="none" stroke="#E8CF97" stroke-width="2.5" stroke-linecap="round" transform="translate(-1.5 -1.5)"/>
+  <circle cx="128" cy="53" r="8" fill="#FFFFFF" stroke="#B76E79" stroke-width="3.5"/>
+  <circle cx="148" cy="86" r="6" fill="#FFFFFF" stroke="#B76E79" stroke-width="3"/>
+</svg>

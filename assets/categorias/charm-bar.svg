@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Charm Bar">
+  <defs><linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBE9EC"/><stop offset="1" stop-color="#F0C4CD"/></linearGradient></defs>
+  <rect width="200" height="200" fill="url(#f)"/>
+  <path d="M30 62 Q100 100 170 62" fill="none" stroke="#C9A25B" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 9"/>
+  <g stroke="#C9A25B" stroke-width="3"><path d="M56 80 V100"/><path d="M100 90 V112"/><path d="M144 80 V100"/></g>
+  <path d="M56 130 C40 116 42 102 50 102 C54 102 56 106 56 106 C56 106 58 102 62 102 C70 102 72 116 56 130 Z" fill="#B76E79"/>
+  <path d="M100 112 L107 128 L124 130 L111 141 L115 158 L100 149 L85 158 L89 141 L76 130 L93 128 Z" fill="#FFFFFF" stroke="#C9A25B" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="144" cy="116" r="15" fill="#FFFFFF" stroke="#B76E79" stroke-width="4"/><circle cx="144" cy="116" r="5" fill="#E8CF97"/>
+</svg>
