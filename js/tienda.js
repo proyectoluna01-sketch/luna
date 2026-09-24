@@ -80,24 +80,31 @@ async function cargarConfigNegocio() {
         const mensaje = encodeURIComponent(`Hola! Tengo una pregunta sobre ${data.nombre_negocio || 'la tienda'}.`);
         urlWhatsapp = `https://wa.me/${telLimpio}?text=${mensaje}`;
         document.getElementById('footer-whatsapp-link').href = urlWhatsapp;
-        const btnFlotante = document.getElementById('btn-whatsapp-flotante');
-        btnFlotante.href = urlWhatsapp;
-        btnFlotante.classList.remove('hidden');
-        redes.push({ url: urlWhatsapp, icono: ICONO_WHATSAPP, nombre: 'WhatsApp', fondo: '#25D366' });
-    } else {
-        document.getElementById('footer-whatsapp-link').style.display = 'none';
+        document.getElementById('btn-whatsapp-flotante').href = urlWhatsapp;
     }
+    // Los botones de WhatsApp se ven SIEMPRE. Mientras no haya telefono en el admin no abren nada y
+    // avisan que falta configurarlo (se ven para poder revisar el diseno; con telefono son enlaces reales).
+    document.getElementById('btn-whatsapp-flotante').classList.remove('hidden');
+    redes.push({ url: urlWhatsapp, icono: ICONO_WHATSAPP, nombre: 'WhatsApp', fondo: '#25D366' });
 
     instagramUrlActual = /^https?:\/\//i.test(data.instagram_url || '') ? data.instagram_url : null;
-    if (instagramUrlActual) {
-        redes.push({ url: instagramUrlActual, icono: ICONO_INSTAGRAM, nombre: 'Instagram',
-                     fondo: 'linear-gradient(45deg,#F9CE34,#EE2A7B 55%,#6228D7)' });
-    }
+    redes.push({ url: instagramUrlActual, icono: ICONO_INSTAGRAM, nombre: 'Instagram',
+                 fondo: 'linear-gradient(45deg,#F9CE34,#EE2A7B 55%,#6228D7)' });
 
     document.getElementById('footer-redes').innerHTML = redes.map(r => `
-        <a href="${escaparHtml(r.url)}" target="_blank" rel="noopener" aria-label="${r.nombre}" title="${r.nombre}"
+        <a href="${r.url ? escaparHtml(r.url) : '#'}" ${r.url ? 'target="_blank" rel="noopener"' : `data-sin-configurar="${r.nombre}"`} aria-label="${r.nombre}" title="${r.nombre}"
            class="h-10 w-10 rounded-full text-white flex items-center justify-center shadow-md shadow-black/20 transition hover:-translate-y-0.5 hover:brightness-110"
            style="background:${r.fondo};">${r.icono}</a>`).join('');
+
+    // Enlaces sin configurar: no navegan, solo avisan
+    document.querySelectorAll('#footer-redes [data-sin-configurar]').forEach(a => {
+        a.addEventListener('click', (e) => { e.preventDefault(); mostrarAviso(`${a.dataset.sinConfigurar} aún no está configurado`); });
+    });
+    if (!urlWhatsapp) {
+        ['footer-whatsapp-link', 'btn-whatsapp-flotante'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => { e.preventDefault(); mostrarAviso('WhatsApp aún no está configurado'); });
+        });
+    }
 
     if (data.color_primario) {
         document.documentElement.style.setProperty('--color-primario', data.color_primario);
