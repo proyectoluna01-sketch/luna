@@ -1,6 +1,6 @@
 // Configuración compartida del panel admin: cliente de Supabase y helpers de sesión.
-const SUPABASE_URL = 'https://cfykgknzoyinlfjopivg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmeWtna256b3lpbmxmam9waXZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NzA5NDUsImV4cCI6MjEwNTE0Njk0NX0.jYdQp_6Z4Ny2q8EGDH9nnF8A3Mih0Fp-EhhsbyeNqs4';
+const SUPABASE_URL = 'https://hchxjllelinmxtxksckg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjaHhqbGxlbGlubXh0eGtzY2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjQyMzIsImV4cCI6MjEwNTg0MDIzMn0.2GtlHx77xfBZSwYCT6usMfFmqD3rxQxrv9O5wuv3Fbg';
 const EDGE_FUNCTION_UPLOAD_URL = `${SUPABASE_URL}/functions/v1/admin-upload`;
 
 // Se llama "sb" (no "supabase") porque el propio CDN de supabase-js ya
