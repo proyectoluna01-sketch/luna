@@ -57,6 +57,12 @@ async function cargarConfigNegocio() {
     nombreNegocioActual = data.nombre_negocio || 'Nuestra tienda';
     document.getElementById('cfg-nombre').value = data.nombre_negocio || '';
     document.getElementById('cfg-color').value = data.color_primario || '#000000';
+    document.getElementById('cfg-color-footer').value = data.color_footer || '#3E2C30';
+    // Categorias: sin color propio = igual al color principal de la pagina
+    const igual = !data.color_categorias;
+    document.getElementById('cfg-color-categorias-igual').checked = igual;
+    document.getElementById('cfg-color-categorias').value = data.color_categorias || data.color_primario || '#B76E79';
+    document.getElementById('cfg-color-categorias').disabled = igual;
     document.getElementById('cfg-telefono').value = data.telefono_contacto || '';
     document.getElementById('cfg-direccion').value = data.direccion || '';
     document.getElementById('cfg-promo').value = data.mensaje_promocional || '';
@@ -88,6 +94,11 @@ function configurarEventosConfig() {
         }
     });
 
+    // El selector de color de categorias solo se puede mover si NO esta marcado "usar el color principal"
+    document.getElementById('cfg-color-categorias-igual').addEventListener('change', (e) => {
+        document.getElementById('cfg-color-categorias').disabled = e.target.checked;
+    });
+
     document.getElementById('btn-guardar-config').addEventListener('click', async () => {
         const msg = document.getElementById('config-msg');
         const { data, error } = await sb.rpc('admin_guardar_config_negocio', {
@@ -101,7 +112,9 @@ function configurarEventosConfig() {
             p_hero_titulo: document.getElementById('cfg-hero-titulo').value.trim() || null,
             p_hero_descripcion: document.getElementById('cfg-hero-descripcion').value.trim() || null,
             p_hero_imagen_url: heroImagenNuevaUrl,
-            p_instagram_url: document.getElementById('cfg-instagram').value.trim() || null
+            p_instagram_url: document.getElementById('cfg-instagram').value.trim() || null,
+            p_color_footer: document.getElementById('cfg-color-footer').value,
+            p_color_categorias: document.getElementById('cfg-color-categorias-igual').checked ? null : document.getElementById('cfg-color-categorias').value
         });
         msg.classList.remove('hidden');
         if (error || !data?.success) {

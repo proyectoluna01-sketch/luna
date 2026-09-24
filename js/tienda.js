@@ -97,6 +97,21 @@ async function cargarConfigNegocio() {
         document.querySelector('meta[name="theme-color"]')?.setAttribute('content', data.color_primario);
     }
 
+    // Color de las categorias (sin color propio = el principal) y su version mas oscura para la seleccionada
+    const colorCategorias = data.color_categorias || data.color_primario;
+    if (colorCategorias) {
+        document.documentElement.style.setProperty('--color-categorias', colorCategorias);
+        document.documentElement.style.setProperty('--color-categorias-oscuro', oscurecerColor(colorCategorias, 25));
+    }
+
+    // Color del footer; si es claro, el texto del footer pasa a oscuro
+    if (data.color_footer) {
+        document.documentElement.style.setProperty('--color-footer', data.color_footer);
+        const n = parseInt(data.color_footer.replace('#', ''), 16);
+        const luminancia = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+        document.getElementById('footer-tienda')?.classList.toggle('footer-claro', luminancia > 0.6);
+    }
+
     if (data.mensaje_promocional) {
         const track = document.getElementById('marquee-track');
         const item = `<span class="mx-6">${data.mensaje_promocional}</span>`;
@@ -122,7 +137,7 @@ function renderCategoriasNav() {
     const iconos = document.getElementById('lista-categorias-iconos');
     const iconoCat = (id, nombre, imagen) => `
         <button data-cat="${id ?? ''}" class="chip-categoria flex flex-col items-center gap-1.5 shrink-0">
-            <span class="h-16 w-16 rounded-full border-2 ${categoriaActiva === id ? 'border-[var(--color-primario)]' : 'border-[#F1D9DE]'} overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
+            <span class="circulo-categoria ${categoriaActiva === id ? 'seleccionada' : ''} h-16 w-16 rounded-full overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
                 ${imagen ? `<img src="${imagen}" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="h-6 w-6 text-[#E3BFC6]"></i>'}
             </span>
             <span class="text-[10px] font-semibold uppercase tracking-wide text-[#7D4F58]">${escaparHtml(nombre)}</span>

@@ -21,7 +21,21 @@
        negocio, y se sobreescriben en runtime (tienda.js) leyendo
        configuracion_negocio.color_primario -- asi el mismo codigo sirve
        para cualquier cliente sin tocar nada aqui. */
-    :root { --color-primario: #B76E79; --color-primario-hover: #a15c67; }
+    :root {
+        --color-primario: #B76E79; --color-primario-hover: #a15c67;
+        /* Editables desde el admin (tienda.js los sobreescribe): fondo del footer y borde de las categorias */
+        --color-footer: #3E2C30;
+        --color-categorias: var(--color-primario);
+        --color-categorias-oscuro: #8f4f5a;
+    }
+    /* Circulo de categoria: linea del color elegido; al seleccionarla se engrosa y se oscurece */
+    .circulo-categoria { border: 2px solid var(--color-categorias); transition: border-width .15s ease, border-color .15s ease; }
+    .circulo-categoria.seleccionada { border-width: 4px; border-color: var(--color-categorias-oscuro); }
+    /* Si el footer se pone de un color CLARO, el texto pasa a oscuro para que se lea */
+    .footer-claro { color: #3E2C30; }
+    .footer-claro .text-white { color: #3E2C30 !important; }
+    .footer-claro [class*="C9AEB3"], .footer-claro [class*="8C7377"] { color: #6B5459 !important; }
+    .footer-claro .border-white\/10 { border-color: rgba(0,0,0,.12) !important; }
     body { font-family: 'Inter', sans-serif; }
     .font-display { font-family: 'Cormorant Garamond', serif; }
     @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -120,7 +134,7 @@
         <p id="sin-productos" class="text-center text-[#B8909A] py-20 hidden">No se encontró ningún producto.</p>
     </main>
 
-    <footer class="bg-[#3E2C30] text-[#EAD9DC]">
+    <footer id="footer-tienda" class="text-[#EAD9DC]" style="background: var(--color-footer);">
         <!-- Franja de confianza -->
         <div class="border-b border-white/10">
             <div class="max-w-6xl mx-auto px-5 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
