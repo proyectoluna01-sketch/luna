@@ -4,3 +4,8 @@ node_modules/
 
 # Local Netlify folder
 .netlify
+
+# Configuracion local de Claude (tokens y notas): NUNCA se sube, este repo es publico en GitHub Pages
+.mcp.json
+CLAUDE.md
+.claude/
