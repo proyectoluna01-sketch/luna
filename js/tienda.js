@@ -9,9 +9,23 @@ function oscurecerColor(hex, porcentaje) {
     return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
 }
 
+// Los nombres de productos/categorias los escribe el admin; se escapan antes de meterlos como HTML.
+function escaparHtml(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Minusculas y sin acentos, para que "labial" encuentre "Lábial" y viceversa.
+function normalizarTexto(texto) {
+    return String(texto ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+}
+
+const DIAS_PRODUCTO_NUEVO = 14;
+const esProductoNuevo = (p) => p.creado_en && (Date.now() - new Date(p.creado_en).getTime()) < DIAS_PRODUCTO_NUEVO * 86400000;
+
 let productosCache = [];
 let categoriasCache = [];
 let categoriaActiva = null;
+let busqueda = '';
 let ordenActual = 'recientes';
 let carrito = JSON.parse(localStorage.getItem('carrito_tienda') || '[]');
 let telefonoNegocio = null;
@@ -32,6 +46,7 @@ async function cargarConfigNegocio() {
     if (!data) return;
     document.getElementById('header-nombre').textContent = data.nombre_negocio || 'Tienda';
     document.title = data.nombre_negocio || 'Tienda';
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', data.nombre_negocio || 'Tienda');
     nombreNegocioActual = data.nombre_negocio || 'Tienda';
     direccionNegocioActual = data.direccion || '';
     if (data.logo_url) {
@@ -75,6 +90,7 @@ async function cargarConfigNegocio() {
     if (data.color_primario) {
         document.documentElement.style.setProperty('--color-primario', data.color_primario);
         document.documentElement.style.setProperty('--color-primario-hover', oscurecerColor(data.color_primario, 15));
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', data.color_primario);
     }
 
     if (data.mensaje_promocional) {
@@ -103,9 +119,9 @@ function renderCategoriasNav() {
     const iconoCat = (id, nombre, imagen) => `
         <button data-cat="${id ?? ''}" class="chip-categoria flex flex-col items-center gap-1.5 shrink-0">
             <span class="h-16 w-16 rounded-full border-2 ${categoriaActiva === id ? 'border-[var(--color-primario)]' : 'border-[#F1D9DE]'} overflow-hidden bg-[#FDF6F7] flex items-center justify-center">
-                ${imagen ? `<img src="${imagen}" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="h-6 w-6 text-[#E3BFC6]"></i>'}
+                ${imagen ? `<img src="${imagen}" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover">` : '<i data-lucide="sparkles" class="h-6 w-6 text-[#E3BFC6]"></i>'}
             </span>
-            <span class="text-[10px] font-semibold uppercase tracking-wide text-[#7D4F58]">${nombre}</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wide text-[#7D4F58]">${escaparHtml(nombre)}</span>
         </button>`;
     iconos.innerHTML = iconoCat(null, 'Todo', null) + categoriasCache.map(c => iconoCat(c.id, c.nombre, c.imagen_url)).join('');
     lucide.createIcons();
@@ -122,6 +138,14 @@ function renderProductos() {
     const sinProductos = document.getElementById('sin-productos');
     let filtrados = categoriaActiva ? productosCache.filter(p => p.categoria_id === categoriaActiva) : productosCache;
 
+    const terminos = normalizarTexto(busqueda).split(/\s+/).filter(Boolean);
+    if (terminos.length) {
+        filtrados = filtrados.filter(p => {
+            const texto = normalizarTexto(`${p.nombre} ${p.categorias?.nombre || ''}`);
+            return terminos.every(t => texto.includes(t));
+        });
+    }
+
     if (ordenActual === 'precio_asc') filtrados = [...filtrados].sort((a, b) => a.precio_venta - b.precio_venta);
     else if (ordenActual === 'precio_desc') filtrados = [...filtrados].sort((a, b) => b.precio_venta - a.precio_venta);
 
@@ -129,23 +153,27 @@ function renderProductos() {
 
     if (filtrados.length === 0) {
         grid.innerHTML = '';
+        sinProductos.textContent = busqueda.trim()
+            ? `No encontramos productos para "${busqueda.trim()}".`
+            : 'No se encontró ningún producto.';
         sinProductos.classList.remove('hidden');
         return;
     }
     sinProductos.classList.add('hidden');
 
-    grid.innerHTML = filtrados.map(p => `
-        <div class="tarjeta-producto group" data-id="${p.id}">
+    grid.innerHTML = filtrados.map((p, i) => `
+        <div class="tarjeta-producto group" data-id="${p.id}" style="animation-delay:${Math.min(i, 12) * 40}ms">
             <div class="relative aspect-square bg-[#FDF6F7] rounded-xl overflow-hidden mb-3 cursor-pointer">
+                ${esProductoNuevo(p) ? `<span class="absolute top-2 left-2 z-10 bg-[var(--color-primario)] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">Nuevo</span>` : ''}
                 ${p.imagen_url
-                    ? `<img src="${p.imagen_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`
+                    ? `<img src="${p.imagen_url}" alt="${escaparHtml(p.nombre)}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`
                     : `<div class="w-full h-full flex items-center justify-center"><i data-lucide="image" class="h-8 w-8 text-[#E3BFC6]"></i></div>`}
                 <button class="btn-agregar-rapido absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[var(--color-primario)] hover:bg-[var(--color-primario)] hover:text-white transition sm:opacity-0 sm:group-hover:opacity-100" data-id="${p.id}" title="Agregar al carrito">
                     <i data-lucide="shopping-bag" class="h-4 w-4 pointer-events-none"></i>
                 </button>
             </div>
             <div class="cursor-pointer">
-                <p class="text-sm text-[#7D4F58] font-medium truncate">${p.nombre}</p>
+                <p class="text-sm text-[#7D4F58] font-medium truncate">${escaparHtml(p.nombre)}</p>
                 <p class="text-[var(--color-primario)] font-semibold">$${parseFloat(p.precio_venta).toFixed(2)}</p>
             </div>
         </div>
@@ -182,7 +210,23 @@ function agregarAlCarrito(producto) {
     if (existente) existente.cantidad += 1;
     else carrito.push({ id: producto.id, nombre: producto.nombre, precio: parseFloat(producto.precio_venta), imagen_url: producto.imagen_url, cantidad: 1 });
     guardarCarrito();
-    abrirCarrito();
+    mostrarAvisoAgregado(producto.nombre);
+}
+
+// Aviso breve "Agregado" + salto del contador del carrito (en vez de abrir el panel de golpe)
+let temporizadorAviso = null;
+function mostrarAvisoAgregado(nombre) {
+    const toast = document.getElementById('toast-tienda');
+    if (toast) {
+        document.getElementById('toast-tienda-texto').textContent = `Agregado: ${nombre}`;
+        toast.classList.remove('opacity-0', 'translate-y-2');
+        clearTimeout(temporizadorAviso);
+        temporizadorAviso = setTimeout(() => toast.classList.add('opacity-0', 'translate-y-2'), 1800);
+    }
+    const contador = document.getElementById('carrito-contador');
+    contador.classList.remove('contador-salto');
+    void contador.offsetWidth; // reinicia la animacion si se agrega varias veces seguidas
+    contador.classList.add('contador-salto');
 }
 
 function cambiarCantidad(id, delta) {
@@ -207,10 +251,10 @@ function renderCarrito() {
         cont.innerHTML = carrito.map(i => `
             <div class="flex items-center gap-3">
                 <div class="h-16 w-16 rounded-lg bg-[#FDF6F7] overflow-hidden shrink-0">
-                    ${i.imagen_url ? `<img src="${i.imagen_url}" class="w-full h-full object-cover">` : ''}
+                    ${i.imagen_url ? `<img src="${i.imagen_url}" alt="" loading="lazy" class="w-full h-full object-cover">` : ''}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-[#7D4F58] truncate">${i.nombre}</p>
+                    <p class="text-sm font-medium text-[#7D4F58] truncate">${escaparHtml(i.nombre)}</p>
                     <p class="text-sm text-[#B76E79] font-semibold">$${i.precio.toFixed(2)}</p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -260,6 +304,29 @@ function configurarEventos() {
 
     document.getElementById('btn-hero-comprar')?.addEventListener('click', () => {
         document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Buscador: la lupa abre/cierra la barra; se filtra mientras se escribe
+    const barraBusqueda = document.getElementById('barra-busqueda');
+    const inputBusqueda = document.getElementById('input-busqueda');
+    const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+    document.getElementById('btn-buscar').addEventListener('click', () => {
+        const abrir = barraBusqueda.classList.contains('hidden');
+        barraBusqueda.classList.toggle('hidden', !abrir);
+        if (abrir) inputBusqueda.focus();
+        else if (busqueda) { busqueda = ''; inputBusqueda.value = ''; btnLimpiar.classList.add('hidden'); renderProductos(); }
+    });
+    inputBusqueda.addEventListener('input', () => {
+        busqueda = inputBusqueda.value;
+        btnLimpiar.classList.toggle('hidden', !busqueda);
+        renderProductos();
+    });
+    inputBusqueda.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { inputBusqueda.blur(); document.querySelector('main').scrollIntoView({ behavior: 'smooth' }); }
+    });
+    btnLimpiar.addEventListener('click', () => {
+        busqueda = ''; inputBusqueda.value = ''; btnLimpiar.classList.add('hidden');
+        renderProductos(); inputBusqueda.focus();
     });
 
     document.getElementById('select-orden').addEventListener('change', (e) => {

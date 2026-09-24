@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tienda</title>
+<meta name="description" content="Explora nuestros productos, arma tu carrito y paga fácil con Yappy o pide por WhatsApp.">
+<meta name="theme-color" content="#B76E79">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tienda">
+<meta property="og:description" content="Explora nuestros productos, arma tu carrito y paga fácil con Yappy o pide por WhatsApp.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,6 +28,18 @@
     .marquee-track { animation: marquee 22s linear infinite; }
     .scroll-sin-barra::-webkit-scrollbar { display: none; }
     .scroll-sin-barra { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Las tarjetas de producto aparecen con una suave subida (el retraso lo pone tienda.js por posicion) */
+    @keyframes aparecer { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .tarjeta-producto { animation: aparecer 0.45s ease both; }
+    /* Salto corto del contador del carrito al agregar un producto */
+    @keyframes salto { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.35); } }
+    .contador-salto { animation: salto 0.35s ease; }
+    /* Aviso "Agregado" */
+    #toast-tienda { transition: opacity 0.25s ease, transform 0.25s ease; }
+    @media (prefers-reduced-motion: reduce) {
+        .tarjeta-producto, .contador-salto, .marquee-track { animation: none !important; }
+        #toast-tienda { transition: none; }
+    }
 </style>
 </head>
 <body class="bg-[#FFFBF9] text-[#3E2C30]">
@@ -36,7 +53,7 @@
     <header class="sticky top-0 z-40 bg-[#FFFBF9]/95 backdrop-blur border-b border-[#F1D9DE]">
         <div class="max-w-6xl mx-auto px-4 sm:px-5 py-4 grid grid-cols-3 items-center">
             <div class="flex justify-start">
-                <button class="p-2 rounded-full hover:bg-[#F8E4E8] transition"><i data-lucide="search" class="h-5 w-5 text-[#7D4F58]"></i></button>
+                <button id="btn-buscar" class="p-2 rounded-full hover:bg-[#F8E4E8] transition" aria-label="Buscar productos"><i data-lucide="search" class="h-5 w-5 text-[#7D4F58]"></i></button>
             </div>
             <div class="flex justify-center items-center gap-3">
                 <img id="header-logo" src="" class="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-[var(--color-primario)]/25 shadow-sm hidden">
@@ -48,6 +65,16 @@
                     <i data-lucide="shopping-bag" class="h-5 w-5 text-[#7D4F58]"></i>
                     <span id="carrito-contador" class="absolute -top-1 -right-1 bg-[var(--color-primario)] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
                 </button>
+            </div>
+        </div>
+
+        <!-- Buscador (se abre con la lupa). El input usa 16px para que el iPhone no haga zoom al enfocarlo -->
+        <div id="barra-busqueda" class="hidden max-w-6xl mx-auto px-4 sm:px-5 pb-3">
+            <div class="flex items-center gap-2 bg-white border border-[#EAC7CE] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[var(--color-primario)]">
+                <i data-lucide="search" class="h-4 w-4 text-[#B8909A] shrink-0"></i>
+                <input id="input-busqueda" type="search" placeholder="Buscar productos..." autocomplete="off" enterkeyhint="search"
+                    class="flex-1 bg-transparent outline-none text-[#3E2C30] placeholder:text-[#B8909A]" style="font-size:16px;">
+                <button id="btn-limpiar-busqueda" class="hidden text-[#B8909A] hover:text-[#7D4F58]" aria-label="Borrar búsqueda"><i data-lucide="x" class="h-4 w-4"></i></button>
             </div>
         </div>
 
@@ -83,7 +110,13 @@
 
     <!-- Grid de productos -->
     <main class="max-w-6xl mx-auto px-4 sm:px-5 pb-24">
-        <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-8"></div>
+        <!-- Tarjetas grises animadas mientras llegan los productos (renderProductos las reemplaza) -->
+        <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-8">
+            <div class="animate-pulse"><div class="aspect-square bg-[#F1E4E7] rounded-xl mb-3"></div><div class="h-3 bg-[#F1E4E7] rounded w-3/4 mb-2"></div><div class="h-3 bg-[#F1E4E7] rounded w-1/3"></div></div>
+            <div class="animate-pulse"><div class="aspect-square bg-[#F1E4E7] rounded-xl mb-3"></div><div class="h-3 bg-[#F1E4E7] rounded w-3/4 mb-2"></div><div class="h-3 bg-[#F1E4E7] rounded w-1/3"></div></div>
+            <div class="animate-pulse"><div class="aspect-square bg-[#F1E4E7] rounded-xl mb-3"></div><div class="h-3 bg-[#F1E4E7] rounded w-3/4 mb-2"></div><div class="h-3 bg-[#F1E4E7] rounded w-1/3"></div></div>
+            <div class="animate-pulse"><div class="aspect-square bg-[#F1E4E7] rounded-xl mb-3"></div><div class="h-3 bg-[#F1E4E7] rounded w-3/4 mb-2"></div><div class="h-3 bg-[#F1E4E7] rounded w-1/3"></div></div>
+        </div>
         <p id="sin-productos" class="text-center text-[#B8909A] py-20 hidden">No se encontró ningún producto.</p>
     </main>
 
@@ -121,6 +154,11 @@
         </div>
         <p class="text-center text-xs text-[#8C7377] pb-6">© <span id="footer-anio"></span> <span id="footer-nombre-copy"></span>. Todos los derechos reservados.</p>
     </footer>
+
+    <!-- Aviso breve al agregar al carrito -->
+    <div id="toast-tienda" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-[70] bg-[#3E2C30] text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg opacity-0 translate-y-2 pointer-events-none flex items-center gap-2" role="status" aria-live="polite">
+        <i data-lucide="check" class="h-4 w-4 text-[#3DDC7A]"></i><span id="toast-tienda-texto">Agregado al carrito</span>
+    </div>
 
     <!-- Boton flotante de WhatsApp -->
     <a id="btn-whatsapp-flotante" href="#" target="_blank" class="fixed bottom-5 right-5 z-30 h-14 w-14 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:scale-105 transition hidden">
