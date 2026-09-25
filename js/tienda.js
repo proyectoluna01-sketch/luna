@@ -61,7 +61,8 @@ async function cargarConfigNegocio() {
     document.getElementById('footer-nombre-copy').textContent = data.nombre_negocio || 'Tienda';
     document.getElementById('footer-anio').textContent = new Date().getFullYear();
     document.getElementById('footer-direccion').textContent = data.direccion || '';
-    document.getElementById('footer-telefono').textContent = data.telefono_contacto ? `Tel: ${data.telefono_contacto}` : '';
+    document.getElementById('footer-telefono').textContent = data.telefono_contacto || '';
+    document.getElementById('footer-telefono').classList.toggle('hidden', !data.telefono_contacto);
     if (data.logo_url) {
         document.getElementById('footer-logo').src = data.logo_url;
         document.getElementById('footer-logo').classList.remove('hidden');
@@ -79,7 +80,6 @@ async function cargarConfigNegocio() {
         const telLimpio = data.telefono_contacto.replace(/\D/g, '');
         const mensaje = encodeURIComponent(`Hola! Tengo una pregunta sobre ${data.nombre_negocio || 'la tienda'}.`);
         urlWhatsapp = `https://wa.me/${telLimpio}?text=${mensaje}`;
-        document.getElementById('footer-whatsapp-link').href = urlWhatsapp;
         document.getElementById('btn-whatsapp-flotante').href = urlWhatsapp;
     }
     // Los botones de WhatsApp se ven SIEMPRE. Mientras no haya telefono en el admin no abren nada y
@@ -101,7 +101,7 @@ async function cargarConfigNegocio() {
         a.addEventListener('click', (e) => { e.preventDefault(); mostrarAviso(`${a.dataset.sinConfigurar} aún no está configurado`); });
     });
     if (!urlWhatsapp) {
-        ['footer-whatsapp-link', 'btn-whatsapp-flotante'].forEach(id => {
+        ['btn-whatsapp-flotante'].forEach(id => {
             document.getElementById(id).addEventListener('click', (e) => { e.preventDefault(); mostrarAviso('WhatsApp aún no está configurado'); });
         });
     }
