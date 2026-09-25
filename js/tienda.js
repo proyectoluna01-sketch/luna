@@ -85,7 +85,6 @@ async function cargarConfigNegocio() {
     // Los botones de WhatsApp se ven SIEMPRE. Mientras no haya telefono en el admin no abren nada y
     // avisan que falta configurarlo (se ven para poder revisar el diseno; con telefono son enlaces reales).
     document.getElementById('btn-whatsapp-flotante').classList.remove('hidden');
-    redes.push({ url: urlWhatsapp, icono: ICONO_WHATSAPP, nombre: 'WhatsApp', fondo: '#25D366' });
 
     instagramUrlActual = /^https?:\/\//i.test(data.instagram_url || '') ? data.instagram_url : null;
     redes.push({ url: instagramUrlActual, icono: ICONO_INSTAGRAM, nombre: 'Instagram',
