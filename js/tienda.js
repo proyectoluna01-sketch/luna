@@ -124,7 +124,7 @@ async function cargarConfigNegocio() {
         document.documentElement.style.setProperty('--color-footer', data.color_footer);
         const n = parseInt(data.color_footer.replace('#', ''), 16);
         const luminancia = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
-        document.getElementById('footer-tienda')?.classList.toggle('footer-claro', luminancia > 0.6);
+        document.getElementById('footer-tienda')?.classList.toggle('footer-claro', luminancia > 0.5);
     }
 
     if (data.mensaje_promocional) {
